@@ -1,0 +1,65 @@
+{
+  "name": "city-bike-visualization",
+  "description": "A city bike visualization using a React wrapper for MapboxGL-js and overlay API from Uber.",
+  "version": "0.0.0",
+  "main": "src/main.js",
+  "keywords": [
+    "citybike",
+    "data-visualization"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uber/react-map-gl.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "alphaify": "^1.0.0",
+    "bowser": "^0.7.3",
+    "canvas-composite-types": "^1.0.0",
+    "d3": "^3.5.5",
+    "debounce": "^1.0.0",
+    "gl-matrix": "^2.3.1",
+    "global": "^4.3.0",
+    "keymirror": "^0.1.1",
+    "mapbox-gl": "~0.11.1",
+    "moment": "^2.10.6",
+    "nop": "^1.0.0",
+    "object-assign": "^3.0.0",
+    "svg-transform": "0.0.1"
+  },
+  "devDependencies": {
+    "bistre": "^1.0.1",
+    "browserify": "^11.2.0",
+    "envify": "^3.4.0",
+    "gulp": "^3.9.0",
+    "gulp-mocha": "^2.1.3",
+    "gulp-server-livereload": "^1.5.3",
+    "gulp-sourcemaps": "^1.6.0",
+    "opn": "^3.0.2",
+    "prova": "^2.1.2",
+    "uber-standard": "^3.6.4",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.4.0"
+  },
+  "scripts": {
+    "start": "budo ./example/main.js --live -t | bistre",
+    "lint": "uber-standard",
+    "test": "npm run lint && prova -q -b -t envify -l chrome test/*",
+    "precommit": "npm run lint -s",
+    "prepush": "npm run lint -s"
+  },
+  "peerDependencies": {
+    "immutable": "^3.7.3",
+    "r-dom": "^1.3.0",
+    "react": "^0.13.0"
+  },
+  "engines": {
+    "node": "0.10.x",
+    "npm": "2.x"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "author": "ᶘ ᵒᴥᵒᶅ Karen"
+}
