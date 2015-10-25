@@ -19,66 +19,71 @@
 // THE SOFTWARE.
 'use strict';
 
-var assign = require('object-assign');
+var document = require('global/document');
 var React = require('react');
 var r = require('r-dom');
-var d3 = require('d3');
-
-var MapGL = require('../../lib/index.js');
-var ScatterplotOverlay = require('../../lib/overlays/scatterplot.react');
+var window = require('global/window');
 var Immutable = require('immutable');
+var moment = require('moment')
 
-// New York
+var ScatterplotExample = require('./scatterplot.react');
+
+function getAccessToken() {
+  var match = window.location.search.match(/access_token=([^&\/]*)/);
+  var accessToken = match && match[1];
+  if (accessToken) {
+    window.localStorage.accessToken = accessToken;
+  } else {
+    accessToken = window.localStorage.accessToken;
+  }
+  return accessToken;
+}
+
+//Example data.
 var location = require('./../../data/cities.json')[0];
+var normal = d3.random.normal();
+function wiggle(scale) {
+  return normal() * scale;
+}
 
-var ScatterplotOverlayExample = React.createClass({
+// Example data.
+var _locations = Immutable.fromJS(d3.range(10).map(function _map() {
+  return [location.latitude + wiggle(0.01), location.longitude + wiggle(0.01), Math.random()*4+4];
+}));
 
-  displayName: 'ScatterplotOverlayExample',
+console.dir(_locations)
 
-  PropTypes: {
-    width: React.PropTypes.number.isRequired,
-    height: React.PropTypes.number.isRequired,
-    locations: React.PropTypes.instanceOf(Immutable.List)
-  },
+var App = React.createClass({
 
-  getInitialState: function getInitialState() {
-    return {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      zoom: 11,
-      startDragLatLng: null,
-      isDragging: false
-    };
-  },
+  displayName: 'App',
 
   _onChangeViewport: function _onChangeViewport(opt) {
     this.setState({
       latitude: opt.latitude,
       longitude: opt.longitude,
       zoom: opt.zoom,
-      startDragLatLng: opt.startDragLatLng,
-      isDragging: opt.isDragging
+      bbox: opt.bbox
     });
   },
 
+  getInitialState: function getInitialState() {
+    return {
+      map: {latitude: 40.71729, longitude: -73.996375, zoom: 8}
+    };
+  },
+
   render: function render() {
-    return r(MapGL, assign({
-      latitude: this.state.latitude,
-      longitude: this.state.longitude,
-      zoom: this.state.zoom,
-      isDragging: this.state.isDragging,
-      startDragLatLng: this.state.startDragLatLng,
-      width: this.props.width,
-      height: this.props.height,
-      onChangeViewport: this.props.onChangeViewport || this._onChangeViewport
-    }, this.props), [
-      r(ScatterplotOverlay, {
-        locations: this.props.locations,
-        globalOpacity: 1,
-        compositeOperation: 'screen'
-      })
+    var common = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      style: {float: 'left'},
+      mapboxApiAccessToken: getAccessToken(),
+      locations: _locations
+    };
+    return r.div([
+      r(ScatterplotExample, common)
     ]);
   }
 });
 
-module.exports = ScatterplotOverlayExample;
+React.render(r(App), document.getElementById('chart'));

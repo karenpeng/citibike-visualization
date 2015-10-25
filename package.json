@@ -28,7 +28,6 @@
     "svg-transform": "0.0.1"
   },
   "devDependencies": {
-    "bistre": "^1.0.1",
     "browserify": "^11.2.0",
     "envify": "^3.4.0",
     "gulp": "^3.9.0",
@@ -41,13 +40,6 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.4.0"
-  },
-  "scripts": {
-    "start": "budo ./example/main.js --live -t | bistre",
-    "lint": "uber-standard",
-    "test": "npm run lint && prova -q -b -t envify -l chrome test/*",
-    "precommit": "npm run lint -s",
-    "prepush": "npm run lint -s"
   },
   "peerDependencies": {
     "immutable": "^3.7.3",
