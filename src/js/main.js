@@ -2,26 +2,52 @@
 
 var document = require('global/document');
 var React = require('react');
+var assign = require('object-assign');
 var r = require('r-dom');
-var App = require('./app.js');
 var Immutable = require('immutable');
 var moment = require('moment');
+var App = require('./app.js');
 
-//Example data.
-var location = require('./../../data/cities.json')[0];
-var normal = d3.random.normal();
-function wiggle(scale) {
-  return normal() * scale;
-}
+var Main = React.createClass({
 
-// Example data.
-var _locations = Immutable.fromJS(d3.range(10).map(function _map() {
-  return [location.latitude + wiggle(0.01), location.longitude + wiggle(0.01), Math.random()*4+4];
-}));
+  getInitialState: function(){
+    return{
+      locations: Immutable.fromJS([])
+    }
+  },
 
-var common = {
-  locations: _locations
-};
+  componentDidMount: function(){
+    console.log('wat')
+    d3.csv('./../../data/test.csv', function(err, data){
+      if(err){
+        console.log(err);
+        return;
+      }
+
+      var _locations = Immutable.fromJS(data.map(function(obj){
+        return[obj['end station latitude'], obj['end station longitude'], Math.random()*2 + 2];
+      }));
+
+      this.setState({
+        locations: _locations
+      });
+
+      console.log(this.state.locations)
+    
+    }.bind(this));
+
+  },
+
+  render: function(){
+    return r(App, assign({
+      locations: this.state.locations
+    }, this.props))
+  }
+
+})
+
+
+React.render(r(Main), document.getElementById('chart'));
     
 
-React.render(r(App, common), document.getElementById('chart'));
+
