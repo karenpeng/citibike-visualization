@@ -27,6 +27,7 @@ var d3 = require('d3');
 
 var MapGL = require('../../lib/index.js');
 var ScatterplotOverlay = require('../../lib/overlays/scatterplot.react');
+var moment = require('moment')
 
 // New York
 var location = require('./../../data/cities.json')[0];
@@ -37,23 +38,20 @@ function wiggle(scale) {
 }
 
 // Example data.
-var locations = Immutable.fromJS(d3.range(40).map(function _map() {
-  return [location.latitude + wiggle(0.01), location.longitude + wiggle(0.01)];
+var locations = Immutable.fromJS(d3.range(10).map(function _map() {
+  return [location.latitude + wiggle(0.01), location.longitude + wiggle(0.01), Math.random()*4+4];
 }));
-console.log(locations)
 
-d3.csv('./../../data/91.csv', function(err, data){
-  if(err){
-    console.log(err)
-    return
-  }
+// d3.csv('./../../data/test.csv', function(err, data){
+//   if(err){
+//     console.log(err)
+//     return
+//   }
 
-  console.dir(data)
-  //var locations = Immutable.fromJS(data)
+//   console.dir(data)
+//   //var locations = Immutable.fromJS(data)
 
-})
-
-console.log(locations)
+// })
 
 var ScatterplotOverlayExample = React.createClass({
 
@@ -97,7 +95,6 @@ var ScatterplotOverlayExample = React.createClass({
     }, this.props), [
       r(ScatterplotOverlay, {
         locations: locations,
-        dotRadius: 6,
         globalOpacity: 1,
         compositeOperation: 'screen'
       })
