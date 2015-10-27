@@ -2,45 +2,51 @@
 
 var document = require('global/document');
 var React = require('react');
-var assign = require('object-assign');
-var r = require('r-dom');
-var Immutable = require('immutable');
-var moment = require('moment');
-var App = require('./app.js');
+var Rcslider = require('rc-slider');
+var App = require('./app');
 
-var id;
+var Immutable = require('immutable');
+var r = require('r-dom');
+var assign = require('object-assign');
+var moment = require('moment');
+
+
+
+
+var animationID;
 var _times = [];
+var _pos = [];
 var index = 0;
-var gap;
+var RATE = 1000;
+var fakeTime = moment("9/1/2015 00:00:00").subtract(RATE, 'millisecond');
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
-  id = requestAnimationFrame(function(){
+  animationID = requestAnimationFrame(function(){
     tick(cb);
   });
   cb();
 }
 
-//@TODO: figure out how to map time in a rate
-function detect(){
+function detect(cb){
+  var gap = moment(_times[index]).diff(fakeTime);
+  console.log(gap)
 
-  var ms = moment(_times[index]).diff(moment());
-  var diff = ms
-  console.log(diff - gap)
-
-  while(diff - gap < 3){
+  while(gap === 0){
     console.log('ouch ' + index)
+    // cb(index)
 
     index ++;
-    ms = moment(_times[index]).diff(moment());
-    diff = ms
+    gap = moment(_times[index]).diff(fakeTime);
     
     if(index === _times.length){
       console.log('STOP!')
-      window.cancelAnimationFrame(id);
+      window.cancelAnimationFrame(animationID);
       return;
     }
   }
+
+  fakeTime.add(RATE, 'millisecond')
 }
 
 var Main = React.createClass({
@@ -51,45 +57,68 @@ var Main = React.createClass({
     }
   },
 
+  changeLocation: function(index){
+    // var _locations = Immutable.fromJS(_pos[index].concat([Math.random()*2 + 2]))
+    // console.log(_locations)
+    // this.setState({
+    //   locations: _locations
+    // })
+  },
+
+  handleClick: function(){
+    console.log('mua')
+    tick(detect.bind(this, this.changeLocation));
+  },
+
+  handleSlide: function(){
+    console.log('It hurts');
+  },
+
   componentDidMount: function(){
     d3.csv('./../../data/test.csv', function(err, data){
       if(err){
         console.log(err);
         return;
       }
-      var _pos = []
 
       var _locations = Immutable.fromJS(data.map(function(obj){
 
         _times.push(obj['starttime'])
         _pos.push([obj['end station latitude'], obj['end station longitude']])
 
-        return[obj['end station latitude'], obj['end station longitude'], Math.random()*2 + 2/*, obj['starttime']*/];
+        return[obj['end station latitude'], obj['end station longitude'], Math.random()*2 + 2/*, obj['fakeTime']*/];
       }));
 
       this.setState({
         locations: _locations
       });
-
-
-    gap = moment("8/31/2015 23:59:59").diff(moment());
-
-      tick(detect)
     
     }.bind(this));
 
   },
 
   render: function(){
-    return r(App, assign({
-      locations: this.state.locations
-    }, this.props))
+    return r.div({}, [
+        r.button(assign({
+          onClick: this.handleClick,
+          innerHTML: 'Click me!'
+        }, this.props)),
+
+        r(App, assign({
+          locations: this.state.locations
+        }, this.props))//,
+
+        // r(Rcslider, assign({
+        //   onChange: this.handleSlide,
+        //   min: 0,
+        //   max: 10
+        // }, this.props))//,
+
+        //r(Rcslider)
+        
+    ])
   }
 
 })
 
-
 React.render(r(Main), document.getElementById('chart'));
-    
-
-

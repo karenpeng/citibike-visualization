@@ -1,6 +1,6 @@
 {
   "name": "city-bike-visualization",
-  "description": "A city bike visualization using a React wrapper for MapboxGL-js and overlay API from Uber.",
+  "description": "A citybike data visualization using a React wrapper for MapboxGL-js and overlay API from Uber.",
   "version": "0.0.0",
   "main": "src/main.js",
   "keywords": [
@@ -25,6 +25,7 @@
     "moment": "^2.10.6",
     "nop": "^1.0.0",
     "object-assign": "^3.0.0",
+    "rc-slider": "^1.5.2",
     "svg-transform": "0.0.1"
   },
   "devDependencies": {
