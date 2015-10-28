@@ -10,15 +10,48 @@ var r = require('r-dom');
 var assign = require('object-assign');
 var moment = require('moment');
 
-
-
-
+var _data, DATA;
 var animationID;
-var _times = [];
-var _pos = [];
 var index = 0;
 var RATE = 1000;
 var fakeTime = moment("9/1/2015 00:00:00").subtract(RATE, 'millisecond');
+
+d3.csv('./../../data/test.csv', function(err, data){
+  if(err){
+    console.log(err);
+    return;
+  }
+
+  _data = data.map(function(obj){
+
+    return {
+      'start_time' : obj['starttime'],
+      'start_location': [obj['start station latitude'], obj['start station longitude']],
+      'start station id' : obj['start station id'],
+      'stop_time': obj['stoptime'],
+      'stop_location': [obj['end station latitude'], obj['end station longitude']],
+      'end station id': obj['end station id'],
+      'usertype': obj['usertype']
+    };
+
+  });
+
+  DATA = Immutable.fromJS(_data);
+
+  console.dir(DATA); //window.DATA = DATA;
+
+  console.dir(_data)
+
+  var nest = 
+    d3.nest()
+      .key(function(d){ 
+        console.dir(d)
+        return d['end station id']
+      })
+      .entries(_data);
+
+  console.dir(nest);
+});
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
@@ -29,40 +62,45 @@ function tick(cb){
 }
 
 function detect(cb){
-  var gap = moment(_times[index]).diff(fakeTime);
-  console.log(gap)
+  if(DATA !== undefined){
 
-  while(gap === 0){
-    console.log('ouch ' + index)
-    // cb(index)
+    try{
+      var gap = moment(DATA.get(index).get('stop_time')).diff(fakeTime);
+      console.log(gap)
 
-    index ++;
-    gap = moment(_times[index]).diff(fakeTime);
-    
-    if(index === _times.length){
-      console.log('STOP!')
-      window.cancelAnimationFrame(animationID);
-      return;
+      while(gap === 0){
+        console.log('ouch ' + index)
+        cb(DATA.get(index))
+
+        index ++;
+        gap = moment(_times[index]).diff(fakeTime);
+        
+        if(index === _times.length){
+          console.log('STOP!')
+          window.cancelAnimationFrame(animationID);
+          return;
+        }
+      }
+
+      fakeTime.add(RATE, 'millisecond')
+    }catch(e){
+      console.log(e)
     }
   }
-
-  fakeTime.add(RATE, 'millisecond')
 }
 
 var Main = React.createClass({
 
-  getInitialState: function(){
-    return{
-      locations: Immutable.fromJS([])
-    }
+  getInitialState: function getInitialState(){
+    return{}
   },
 
   changeLocation: function(index){
-    // var _locations = Immutable.fromJS(_pos[index].concat([Math.random()*2 + 2]))
-    // console.log(_locations)
-    // this.setState({
-    //   locations: _locations
-    // })
+    var _locations = DATA.get(index).get('stop_location');
+    console.log(_locations)
+    this.setState({
+      locations: _locations
+    })
   },
 
   handleClick: function(){
@@ -75,46 +113,33 @@ var Main = React.createClass({
   },
 
   componentDidMount: function(){
-    d3.csv('./../../data/test.csv', function(err, data){
-      if(err){
-        console.log(err);
-        return;
-      }
-
-      var _locations = Immutable.fromJS(data.map(function(obj){
-
-        _times.push(obj['starttime'])
-        _pos.push([obj['end station latitude'], obj['end station longitude']])
-
-        return[obj['end station latitude'], obj['end station longitude'], Math.random()*2 + 2/*, obj['fakeTime']*/];
-      }));
-
-      this.setState({
-        locations: _locations
-      });
-    
-    }.bind(this));
 
   },
 
   render: function(){
+    
     return r.div({}, [
-        r.button(assign({
-          onClick: this.handleClick,
-          innerHTML: 'Click me!'
-        }, this.props)),
 
         r(App, assign({
           locations: this.state.locations
-        }, this.props))//,
+        })),
 
-        // r(Rcslider, assign({
-        //   onChange: this.handleSlide,
-        //   min: 0,
-        //   max: 10
-        // }, this.props))//,
+        r.div({
+          className: 'panel'
+        }, [
+          r.button(assign({
+            onClick: this.handleClick,
+            className: 'btn'
+          }), 'start'),
 
-        //r(Rcslider)
+          r(Rcslider, assign({
+            onChange: this.handleSlide,
+            defaultValue: 5,
+            min: 0,
+            max: 10
+          }))
+
+        ])
         
     ])
   }

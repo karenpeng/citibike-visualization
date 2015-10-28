@@ -6,8 +6,6 @@ var window = require('global/window');
 var Immutable = require('immutable');
 
 var ScatterplotExample = require('./scatterplot.react');
-// var UnderneathMap = require('./underneath.map.js');
-// var OverlayCanvas = require('./overlay.canvas.js');
 
 function getAccessToken() {
   var match = window.location.search.match(/access_token=([^&\/]*)/);
@@ -51,11 +49,8 @@ var App = React.createClass({
       mapboxApiAccessToken: getAccessToken(),
       locations: this.props.locations
     };
-    return r.div([
-      r(ScatterplotExample, common)
-      // r(UnderneathMap, common),
-      // r(OverlayCanvas, common)
-    ]);
+    return r(ScatterplotExample, common);
+
   }
 });
 
