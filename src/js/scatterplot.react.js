@@ -46,7 +46,7 @@ var ScatterplotOverlayExample = React.createClass({
     return {
       latitude: location.latitude,
       longitude: location.longitude,
-      zoom: 12,
+      zoom: 11,
       startDragLatLng: null,
       isDragging: false
     };

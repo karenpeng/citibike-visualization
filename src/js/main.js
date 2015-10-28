@@ -10,60 +10,20 @@ var r = require('r-dom');
 var assign = require('object-assign');
 var moment = require('moment');
 
-var _data, DATA;
-var DOTS = {};
+var loadData = require('./data.processing');
 var animationID;
 var index = 0;
 var RATE = 1000;
 var fakeTime = moment("9/1/2015 00:00:00").subtract(RATE, 'millisecond');
+var timeData, stationData;
 
-d3.csv('./../../data/test.csv', function(err, data){
-  if(err){
-    console.log(err);
-    return;
-  }
+loadData(initMain);
 
-  _data = data.map(function(obj){
-
-    return {
-      'start_time' : obj['starttime'],
-      'start_location': [obj['start station latitude'], obj['start station longitude']],
-      'start_station_id' : obj['start station id'],
-      'stop_time': obj['stoptime'],
-      'stop_location': [obj['end station latitude'], obj['end station longitude']],
-      'end_station_id': obj['end station id'],
-      'usertype': obj['usertype']
-    };
-
-  });
-
-  DATA = Immutable.fromJS(_data);
-
-  //console.dir(DATA); //window.DATA = DATA;
-
-  //console.dir(_data);
-
-  var nest = 
-    d3.nest()
-      .key(function(d){ 
-        return d['end_station_id']
-      })
-      .entries(_data);
-
-  //console.dir(nest);
-
-  nest.forEach(function(obj){
-    //assign(DOTS, {obj.key : obj.values[0]['stop_location']});
-    DOTS[obj.key] = {
-      'loc': obj.values[0]['stop_location'],
-      'radius': 4
-    };
-  })
-
-  console.dir(DOTS);
-
+function initMain(_timeData, _stationData){
+  timeData = _timeData;
+  stationData = _stationData;
   React.render(r(Main), document.getElementById('chart'));
-});
+}
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
@@ -73,23 +33,27 @@ function tick(cb){
   cb();
 }
 
-function detect(increase, decrease){
+function detect(increase, decrease, size){
+  
+  var gap = moment(timeData[index]['time']).diff(fakeTime);
 
-  var gap1 = moment(_data[index]['start_time']).diff(fakeTime);
-  var gap2 = moment(_data[index]['stop_time']).diff(fakeTime);
+  while(gap === 0){
 
-  while(gap1 === 0){
-    console.log('ouch ' + index)
-    decrease(_data[index]['start_station_id']);
+    if(timeData[index]['prop'] === 'start'){
+      decrease(timeData[index]['id']);
+    }else{
+      increase(timeData[index]['id']);
+    }
 
     index ++;
-    gap1 = moment(_data[index]['start_time']).diff(fakeTime);
     
-    if(index === DATA.size){
+    if(index === size){
       console.log('STOP!')
       window.cancelAnimationFrame(animationID);
       return;
     }
+
+    gap = moment(timeData[index]['time']).diff(fakeTime);
   }
 
   fakeTime.add(RATE, 'millisecond');
@@ -100,32 +64,30 @@ var Main = React.createClass({
 
   getInitialState: function getInitialState(){
     return{
-      dots: DOTS
-    }
+      dots: stationData
+    };
   },
 
   _increaseDot: function(key){
 
-    DOTS[key].radius += 4
+    stationData[key].radius +=2
 
     this.setState({
-      dots: DOTS
+      dots: stationData
     })
   },
 
   _decreaseDot: function(key){
-    console.log(key, DOTS[key])
 
-    DOTS[key].radius -= 4
+    stationData[key].radius -=2
 
     this.setState({
-      dots: DOTS
+      dots: stationData
     })
   },
 
-  handleClick: function(){
-    console.dir(_data)
-    tick(detect.bind(this, this._increaseDot, this._decreaseDot));
+  handleClick: function(data){
+    tick(detect.bind(this, this._increaseDot, this._decreaseDot, timeData.length));
   },
 
   handleSlide: function(){
@@ -142,7 +104,7 @@ var Main = React.createClass({
     return r.div({}, [
 
         r(App, assign({
-          dots: DOTS
+          dots: stationData
         })),
 
         r.div({
