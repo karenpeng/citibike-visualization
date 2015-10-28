@@ -11,6 +11,7 @@ var assign = require('object-assign');
 var moment = require('moment');
 
 var _data, DATA;
+var DOTS = {};
 var animationID;
 var index = 0;
 var RATE = 1000;
@@ -38,19 +39,30 @@ d3.csv('./../../data/test.csv', function(err, data){
 
   DATA = Immutable.fromJS(_data);
 
-  console.dir(DATA); //window.DATA = DATA;
+  //console.dir(DATA); //window.DATA = DATA;
 
-  console.dir(_data)
+  //console.dir(_data);
 
   var nest = 
     d3.nest()
       .key(function(d){ 
-        console.dir(d)
         return d['end station id']
       })
       .entries(_data);
 
-  console.dir(nest);
+  //console.dir(nest);
+
+  nest.forEach(function(obj){
+    //assign(DOTS, {obj.key : obj.values[0]['stop_location']});
+    DOTS[obj.key] = {
+      'loc': obj.values[0]['stop_location'],
+      'radius': 2
+    };
+  })
+
+  console.dir(DOTS);
+
+  React.render(r(Main), document.getElementById('chart'));
 });
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
@@ -61,51 +73,59 @@ function tick(cb){
   cb();
 }
 
-function detect(cb){
+function detect(increase, decrease){
   if(DATA !== undefined){
 
-    try{
-      var gap = moment(DATA.get(index).get('stop_time')).diff(fakeTime);
-      console.log(gap)
+    var gap = moment(DATA.get(index).get('stop_time')).diff(fakeTime);
+    console.log(gap)
 
-      while(gap === 0){
-        console.log('ouch ' + index)
-        cb(DATA.get(index))
+    while(gap === 0){
+      console.log('ouch ' + index)
+      increase(DATA.get(index).get('end station id'));
 
-        index ++;
-        gap = moment(_times[index]).diff(fakeTime);
-        
-        if(index === _times.length){
-          console.log('STOP!')
-          window.cancelAnimationFrame(animationID);
-          return;
-        }
+      index ++;
+      gap = moment(DATA.get(index).get('stop_time')).diff(fakeTime);
+      
+      if(index === DATA.size){
+        console.log('STOP!')
+        window.cancelAnimationFrame(animationID);
+        return;
       }
-
-      fakeTime.add(RATE, 'millisecond')
-    }catch(e){
-      console.log(e)
     }
+
+    fakeTime.add(RATE, 'millisecond');
+
   }
 }
 
 var Main = React.createClass({
 
   getInitialState: function getInitialState(){
-    return{}
+    return{
+      dots: DOTS
+    }
   },
 
-  changeLocation: function(index){
-    var _locations = DATA.get(index).get('stop_location');
-    console.log(_locations)
+  _increaseDot: function(key){
+    DOTS[key].raduis++
+
     this.setState({
-      locations: _locations
+      dots: DOTS
+    })
+
+  },
+
+  _decreaseDot: function(key){
+    DOTS[key].raduis--
+
+    this.setState({
+      dots: DOTS
     })
   },
 
   handleClick: function(){
     console.log('mua')
-    tick(detect.bind(this, this.changeLocation));
+    tick(detect.bind(this, this._increaseDot, this._decreaseDot));
   },
 
   handleSlide: function(){
@@ -117,11 +137,12 @@ var Main = React.createClass({
   },
 
   render: function(){
+
     
     return r.div({}, [
 
         r(App, assign({
-          locations: this.state.locations
+          dots: DOTS
         })),
 
         r.div({
@@ -145,5 +166,3 @@ var Main = React.createClass({
   }
 
 })
-
-React.render(r(Main), document.getElementById('chart'));

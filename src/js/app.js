@@ -23,7 +23,8 @@ var App = React.createClass({
   displayName: 'App',
 
   PropTypes: {
-    locations: React.PropTypes.instanceOf(Immutable.List)
+    //locations: React.PropTypes.instanceOf(Immutable.List)
+    dots: React.PropTypes.array
   },
 
   _onChangeViewport: function _onChangeViewport(opt) {
@@ -47,7 +48,8 @@ var App = React.createClass({
       height: window.innerHeight,
       style: {float: 'left'},
       mapboxApiAccessToken: getAccessToken(),
-      locations: this.props.locations
+      //locations: this.props.locations
+      dots: this.props.dots
     };
     return r(ScatterplotExample, common);
 

@@ -38,7 +38,8 @@ var ScatterplotOverlayExample = React.createClass({
   PropTypes: {
     width: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
-    locations: React.PropTypes.instanceOf(Immutable.List)
+    //locations: React.PropTypes.instanceOf(Immutable.List)
+    dots: React.PropTypes.array.isRequired
   },
 
   getInitialState: function getInitialState() {
@@ -73,7 +74,8 @@ var ScatterplotOverlayExample = React.createClass({
       onChangeViewport: this.props.onChangeViewport || this._onChangeViewport
     }, this.props), [
       r(ScatterplotOverlay, {
-        locations: this.props.locations,
+        //locations: this.props.locations,
+        dots: this.props.dots,
         globalOpacity: 1,
         compositeOperation: 'screen'
       })
