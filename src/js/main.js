@@ -28,10 +28,10 @@ d3.csv('./../../data/test.csv', function(err, data){
     return {
       'start_time' : obj['starttime'],
       'start_location': [obj['start station latitude'], obj['start station longitude']],
-      'start station id' : obj['start station id'],
+      'start_station_id' : obj['start station id'],
       'stop_time': obj['stoptime'],
       'stop_location': [obj['end station latitude'], obj['end station longitude']],
-      'end station id': obj['end station id'],
+      'end_station_id': obj['end station id'],
       'usertype': obj['usertype']
     };
 
@@ -46,7 +46,7 @@ d3.csv('./../../data/test.csv', function(err, data){
   var nest = 
     d3.nest()
       .key(function(d){ 
-        return d['end station id']
+        return d['end_station_id']
       })
       .entries(_data);
 
@@ -56,7 +56,7 @@ d3.csv('./../../data/test.csv', function(err, data){
     //assign(DOTS, {obj.key : obj.values[0]['stop_location']});
     DOTS[obj.key] = {
       'loc': obj.values[0]['stop_location'],
-      'radius': 2
+      'radius': 4
     };
   })
 
@@ -74,28 +74,26 @@ function tick(cb){
 }
 
 function detect(increase, decrease){
-  if(DATA !== undefined){
 
-    var gap = moment(DATA.get(index).get('stop_time')).diff(fakeTime);
-    console.log(gap)
+  var gap1 = moment(_data[index]['start_time']).diff(fakeTime);
+  var gap2 = moment(_data[index]['stop_time']).diff(fakeTime);
 
-    while(gap === 0){
-      console.log('ouch ' + index)
-      increase(DATA.get(index).get('end station id'));
+  while(gap1 === 0){
+    console.log('ouch ' + index)
+    decrease(_data[index]['start_station_id']);
 
-      index ++;
-      gap = moment(DATA.get(index).get('stop_time')).diff(fakeTime);
-      
-      if(index === DATA.size){
-        console.log('STOP!')
-        window.cancelAnimationFrame(animationID);
-        return;
-      }
+    index ++;
+    gap1 = moment(_data[index]['start_time']).diff(fakeTime);
+    
+    if(index === DATA.size){
+      console.log('STOP!')
+      window.cancelAnimationFrame(animationID);
+      return;
     }
-
-    fakeTime.add(RATE, 'millisecond');
-
   }
+
+  fakeTime.add(RATE, 'millisecond');
+
 }
 
 var Main = React.createClass({
@@ -107,16 +105,18 @@ var Main = React.createClass({
   },
 
   _increaseDot: function(key){
-    DOTS[key].raduis++
+
+    DOTS[key].radius += 4
 
     this.setState({
       dots: DOTS
     })
-
   },
 
   _decreaseDot: function(key){
-    DOTS[key].raduis--
+    console.log(key, DOTS[key])
+
+    DOTS[key].radius -= 4
 
     this.setState({
       dots: DOTS
@@ -124,7 +124,7 @@ var Main = React.createClass({
   },
 
   handleClick: function(){
-    console.log('mua')
+    console.dir(_data)
     tick(detect.bind(this, this._increaseDot, this._decreaseDot));
   },
 
