@@ -21,12 +21,19 @@ var Clock = React.createClass({
     var _m = (this.props.month+1) < 10 ? '0'+(this.props.month+1) : (this.props.month+1);
     var _d = this.props.date < 10 ? '0'+this.props.date : this.props.date;
 
+    var dateStyle = {color: this.props.hour >= 6 && this.props.hour < 18 ? '#666' : '#aaa'}
+    var clockStyle = {color: this.props.hour >=6 && this.props.hour < 18 ? '#444' : '#ddd'}
+
     return r.div({},[
 
-      r.p({className: 'date'}, _m+'/'+_d+'/2015'),
+      r.p({
+        className: 'date',
+        style: dateStyle
+      }, _m+'/'+_d+'/2015'),
 
       r.div({
-        className: this.props._className
+        className: 'clock',
+        style: clockStyle
       }, [
         r.span(this.props.hour < 10 ? '0'+this.props.hour : this.props.hour),
         r.span(':'),

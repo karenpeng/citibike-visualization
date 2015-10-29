@@ -39,7 +39,13 @@ var ScatterplotOverlayExample = React.createClass({
     width: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
     //locations: React.PropTypes.instanceOf(Immutable.List)
-    dots: React.PropTypes.array.isRequired
+    dots: React.PropTypes.object.isRequired
+  },
+
+  getDefaultProps: function getDefaultProps(){
+    return{
+      mapStyle: 'mapbox://styles/mapbox/light-v8'
+    }
   },
 
   getInitialState: function getInitialState() {
@@ -71,13 +77,15 @@ var ScatterplotOverlayExample = React.createClass({
       startDragLatLng: this.state.startDragLatLng,
       width: this.props.width,
       height: this.props.height,
-      onChangeViewport: this.props.onChangeViewport || this._onChangeViewport
+      onChangeViewport: this.props.onChangeViewport || this._onChangeViewport,
+      mapStyle: this.props.mapStyle
     }, this.props), [
       r(ScatterplotOverlay, {
         //locations: this.props.locations,
         dots: this.props.dots,
         globalOpacity: 1,
-        compositeOperation: 'screen'
+        compositeOperation: 'screen',
+        zoom: this.state.zoom
       })
     ]);
   }

@@ -6,6 +6,10 @@ html, body{
   font-family: 'Roboto', sans-serif;
 }
 
+a{
+  text-decoration: none;
+}
+
 .overlayCanvas{
   opacity: 0.5;
 }
@@ -29,11 +33,11 @@ button{
 }
 
 .clickable{
-  background-color: #1FBAD6;
+  background-color: #0058C1;
 }
 
 .unclickable{
-  background-color: #e9e9e9;
+  background-color: #CCC;
 }
 
 .clickable:hover{
@@ -73,11 +77,34 @@ button{
 .date{
   margin: 10px 20px;
   font-size: 30px;
-  color: #666;
 }
 
 .clock{
   margin: 10px 20px;
   font-size: 50px;
-  color: #555;
+}
+
+.info{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  text-align: center;
+  background-color: #0058C1;
+  opacity: 0.8;
+}
+
+.title{
+  margin: 10px 0 0 0;
+  color: white;
+}
+
+.subtitle{
+  color: #ccc;
+  font-size: 12px;
+}
+
+.link{
+  color: #eee;
 }
