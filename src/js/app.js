@@ -35,7 +35,7 @@ function tick(cb){
 
 function detect(increase, decrease, updateTime, size){
 
-  updateTime(fakeTime.hours(), fakeTime.minutes(), fakeTime.seconds());
+  updateTime(fakeTime.month(), fakeTime.date(), fakeTime.hours(), fakeTime.minutes(), fakeTime.seconds());
 
   var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
   //console.log(gap)
@@ -75,6 +75,8 @@ var App = React.createClass({
       init: false,
       loaded: false,
       ticking: false,
+      month: fakeTime.month(),
+      date: fakeTime.date(),
       hour: fakeTime.hours(),
       minute: fakeTime.minutes(),
       second: fakeTime.seconds()
@@ -101,9 +103,11 @@ var App = React.createClass({
     })
   },
 
-  _updateTime: function(h, m, s){
+  _updateTime: function(mo, d, h, m, s){
 
     this.setState({
+      month: mo,
+      date: d,
       hour: h,
       minute: m,
       second: s
@@ -173,7 +177,8 @@ var App = React.createClass({
       }, [
 
         r(Clock, assign({
-          date: '09/01/2015',
+          month: this.state.month,
+          date: this.state.date,
           hour: this.state.hour,
           minute: this.state.minute,
           second: this.state.second,

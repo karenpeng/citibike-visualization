@@ -9,6 +9,7 @@ var Clock = React.createClass({
   displayName: 'Clock',
 
   PropTypes: {
+    month: React.PropTypes.number.isRequired,
     date: React.PropTypes.number.isRequired,
     hour: React.PropTypes.number.isRequired,
     minute: React.PropTypes.number.isRequired,
@@ -16,9 +17,13 @@ var Clock = React.createClass({
   },
 
   render: function(){
+
+    var _m = (this.props.month+1) < 10 ? '0'+(this.props.month+1) : (this.props.month+1);
+    var _d = this.props.date < 10 ? '0'+this.props.date : this.props.date;
+
     return r.div({},[
 
-      r.p({className: 'date'}, this.props.date),
+      r.p({className: 'date'}, _m+'/'+_d+'/2015'),
 
       r.div({
         className: this.props._className
