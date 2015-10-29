@@ -22,7 +22,6 @@ var fakeTime = moment("9/1/2015 00:00:00").subtract(RATE, 'millisecond');
 var timeData = [];
 var stationData = {};
 
-
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
   animationID = requestAnimationFrame(function(){
@@ -67,6 +66,7 @@ var App = React.createClass({
       dots: {},
       width: window.innerWidth,
       height: window.innerHeight,
+      loaded: 0,
       ticking: false
     };
   },
@@ -109,7 +109,7 @@ var App = React.createClass({
 
   handleSlide: function(value){
     console.log(value);
-    RATE = 10000 + value * 10;
+    RATE = 10000 + value * 100;
   },
 
   componentDidMount: function(){
@@ -118,17 +118,23 @@ var App = React.createClass({
     //@TODO: figure out how to do this without settimeout maybe?
     //cus the loading blocks the loading of the map
     setTimeout(function(){
-      console.log('start loading data...')
+        
+      that.setState({
+        loaded: 1
+      });
+
       loadData(function(_timeData, _stationData){
         timeData = _timeData;
         stationData = _stationData;
 
         that.setState({ 
-          dots: _stationData
+          dots: _stationData,
+          loaded: 0
         });
 
       });
-    }, 3000);
+
+    }, 5000);
   },
 
   render: function(){
@@ -148,7 +154,7 @@ var App = React.createClass({
       }, [
         r.button(assign({
           onClick: this.handleClick,
-          disabled: timeData.length === 0,
+          disabled: this.state.loaded === 1,
           className: 'btn'
         }), 'start'),
 
@@ -156,14 +162,14 @@ var App = React.createClass({
           onChange: this.handleSlide,
           disabled: !this.state.ticking,
           defaultValue: 0,
-          min: -40,
-          max: 40,
+          min: -10,
+          max: 10,
           step: 1
         }))
       ]),
 
       r.div({
-        className: timeData.length === 0 ? 'show' : 'gone'
+        className: this.state.loaded === 0 ? 'gone' : 'show'
       }, [
         r.p({className: 'loading'}, 'loading data...'),
         r.div({className: 'bg'})

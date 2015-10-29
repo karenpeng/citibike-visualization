@@ -1,6 +1,5 @@
 'use strict';
 
-var d3 = require('d3');
 var moment = require('moment');
 
 function loadData(cb){
@@ -35,39 +34,34 @@ function loadData(cb){
       .sort(function(a, b){
         return moment(a['time']).diff(moment(b['time']));
       })
-    console.dir(timeData)
 
-
-    var nest = d3.nest()
-      .key(function(d){
-        return d['id']
-      })
-      .entries(_data1.concat(_data2))
-
-    console.dir(nest)
+    //console.dir(timeData)
 
     var stationData = {};
-      
-    nest.forEach(function(d){
 
-      var _key =  d['key'] + '';
-
-      if(Number.isInteger(+_key) && Array.isArray(d['values'][0]['loc']) ) {
-
-        if(_key === 'starttime'){
-          console.log(d)
+    (_data1.concat(_data2)).forEach(function(d){
+      if(Number.isInteger(+d['id'])){
+        if(!stationData.hasOwnProperty(d['id'])){
+          stationData[d['id']] = {
+            'loc': d['loc'],
+            //'radius': 1
+            'radius': 6
+          }
+        }else{
+          // if(d['prop'] === 'start'){
+          //   stationData[d['id']]['radius']++;
+          // }
+          // if(d['prop'] === 'stop'){
+          //   stationData[d['id']]['radius']--;
+          //   stationData[d['id']]['radius'] = 
+          //     stationData[d['id']]['radius'] < 0 ?
+          //     0 : stationData[d['id']]['radius'];
+          // }
         }
-
-        stationData[_key] = {
-          'loc': d['values'][0]['loc'],
-          'radius': 6
-        }
-
       }
+    });
 
-    })
-
-    console.dir(stationData)
+    //console.dir(stationData)
 
     console.log('data loaded!')
 

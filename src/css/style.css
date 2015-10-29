@@ -21,12 +21,12 @@ html, body{
   display: inline;
   margin: 20px;
   width: 100px;
-  border: 2px solid white;
-  border-radius: 12px;
+/*  border: 2px solid white;
+  border-radius: 12px;*/
   height: 39px;
-  background-color: #1FBAD6;
+/*  background-color: #1FBAD6;
   color: white;
-  font-size: 16px;
+  font-size: 16px;*/
 }
 
 .btn:hover{
