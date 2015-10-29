@@ -5,7 +5,7 @@ var moment = require('moment');
 
 function loadData(cb){
 
-  d3.csv('./../../data/91.csv', function(err, data){
+  d3.csv('../../data/91.csv', function(err, data){
     if(err){
       console.log(err);
       return;
