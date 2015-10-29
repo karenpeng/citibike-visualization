@@ -9,7 +9,7 @@ var mocha = require('gulp-mocha')
 
 function compile(watch) {
   var bundler = watchify(browserify({
-    entries:'./src/js/main.js',
+    entries:'./src/js/app.js',
     debug: true
   }))
 

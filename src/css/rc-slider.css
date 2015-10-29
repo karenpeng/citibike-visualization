@@ -9,9 +9,10 @@
 .rc-slider {
   position: relative;
   height: 8px;
-  width: 100%;
+  max-width: 200px;
   border-radius: 6px;
   background-color: #e9e9e9;
+  margin: 20px;
 }
 .rc-slider-track {
   position: absolute;
@@ -117,7 +118,7 @@
 }
 .rc-slider-tooltip-inner {
   padding: 6px 0;
-  width: 60px;
+  width: 40px;
   height: 24px;
   font-size: 12px;
   line-height: 1;

@@ -2,21 +2,16 @@
 
 var d3 = require('d3');
 var moment = require('moment');
-var assign = require('object-assign');
 
 function loadData(cb){
 
-  var _data1, _data2;
-  var timeData = [];
-  var stationData = {}; 
-
-  d3.csv('./../../data/test.csv', function(err, data){
+  d3.csv('./../../data/91.csv', function(err, data){
     if(err){
       console.log(err);
       return;
     }
 
-    _data1 = data.map(function(obj){
+   var  _data1 = data.map(function(obj){
       return {
         'time': obj['starttime'],
         'prop': 'start',
@@ -26,7 +21,7 @@ function loadData(cb){
       };
     });
 
-    _data2 = data.map(function(obj){
+    var _data2 = data.map(function(obj){
       return{
         'time': obj['stoptime'],
         'prop': 'stop',
@@ -36,8 +31,7 @@ function loadData(cb){
       }
     });
 
-
-    timeData = _data1.concat(_data2)
+    var timeData = (_data1.concat(_data2))
       .sort(function(a, b){
         return moment(a['time']).diff(moment(b['time']));
       })
@@ -46,30 +40,39 @@ function loadData(cb){
 
     var nest = d3.nest()
       .key(function(d){
-        return d.id
+        return d['id']
       })
       .entries(_data1.concat(_data2))
+
+    console.dir(nest)
+
+    var stationData = {};
       
     nest.forEach(function(d){
 
       var _key =  d['key'] + '';
-      // var _obj = {
-      //   _key : {
-      //     'loc': d['values'][0]['loc'],
-      //     'radius': 4
-      //   }
-      // }
-      //assign(stationData, _obj)
-      stationData[_key] = {
-        'loc': d['values'][0]['loc'],
-        'radius': 10
+
+      if(Number.isInteger(+_key) && Array.isArray(d['values'][0]['loc']) ) {
+
+        if(_key === 'starttime'){
+          console.log(d)
+        }
+
+        stationData[_key] = {
+          'loc': d['values'][0]['loc'],
+          'radius': 6
+        }
+
       }
 
     })
 
-      console.dir(stationData)
+    console.dir(stationData)
 
-      cb(timeData, stationData);
+    console.log('data loaded!')
+
+    cb(timeData, stationData);
+
   });
 }
 
