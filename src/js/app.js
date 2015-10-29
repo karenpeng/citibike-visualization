@@ -23,7 +23,7 @@ var fakeTime = moment("9/1/2015 00:00:00").subtract(RATE, 'millisecond');
 var timeData;
 var stationData = {};
 
-var scale = d3.scale.linear().range([0, 1]).domain([60, 6])
+var scale = d3.scale.linear().range([0, 1]).domain([30, 6])
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
@@ -50,7 +50,7 @@ function detect(increase, decrease, updateTime, size){
 
     index ++;
     
-    if(index === size){
+    if(index === size - 1){
       console.log('STOP!')
       window.cancelAnimationFrame(animationID);
       return;
@@ -88,9 +88,9 @@ var App = React.createClass({
     stationData[key].radius += scale(stationData[key].radius)
     stationData[key].radius = stationData[key].radius < 0 ? 0 : stationData[key].radius
 
-    this.setState({
-      dots: stationData
-    })
+    // this.setState({
+    //   dots: stationData
+    // })
   },
 
   _decreaseDot: function(key){
@@ -98,9 +98,9 @@ var App = React.createClass({
     stationData[key].radius -= scale(stationData[key].radius)
     stationData[key].radius = stationData[key].radius < 0 ? 0 : stationData[key].radius
 
-    this.setState({
-      dots: stationData
-    })
+    // this.setState({
+    //   dots: stationData
+    // })
   },
 
   _updateTime: function(h, m, s){
@@ -131,7 +131,7 @@ var App = React.createClass({
   },
 
   handleSlide: function(value){
-    RATE = 10000 + value * 100;
+    RATE = 10000 + value * 1000;
   },
 
   componentDidMount: function(){
