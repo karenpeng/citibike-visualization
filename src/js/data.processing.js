@@ -1,5 +1,6 @@
 'use strict';
 
+var Immutable = require('immutable');
 var moment = require('moment');
 
 function loadData(cb){
@@ -30,10 +31,12 @@ function loadData(cb){
       }
     });
 
-    var timeData = (_data1.concat(_data2))
+    var timeData = Immutable.fromJS(
+      (_data1.concat(_data2))
       .sort(function(a, b){
         return moment(a['time']).diff(moment(b['time']));
       })
+    )
 
     //console.dir(timeData)
 

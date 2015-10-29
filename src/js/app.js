@@ -5,6 +5,7 @@ var window = require('global/window');
 var React = require('react');
 var Rcslider = require('rc-slider');
 var ScatterplotExample = require('./scatterplot.react');
+var Clock = require('./clock');
 var getAccessToken = require('./util');
 var token = require('./../../token.json').token[2];
 
@@ -19,8 +20,10 @@ var animationID;
 var index = 0;
 var RATE = 10000;
 var fakeTime = moment("9/1/2015 00:00:00").subtract(RATE, 'millisecond');
-var timeData = [];
+var timeData;
 var stationData = {};
+
+var scale = d3.scale.linear().range([0, 1]).domain([60, 6])
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
@@ -30,16 +33,19 @@ function tick(cb){
   cb();
 }
 
-function detect(increase, decrease, size){
+function detect(increase, decrease, updateTime, size){
 
-  var gap = moment(timeData[index]['time']).diff(fakeTime);
+  updateTime(fakeTime.hours(), fakeTime.minutes(), fakeTime.seconds());
+
+  var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
+  //console.log(gap)
   
   while(gap <= 0){
 
-    if(timeData[index]['prop'] === 'start'){
-      decrease(timeData[index]['id']);
+    if(timeData.get(index).get('prop') === 'start'){
+      decrease(timeData.get(index).get('id'));
     }else{
-      increase(timeData[index]['id']);
+      increase(timeData.get(index).get('id'));
     }
 
     index ++;
@@ -50,7 +56,7 @@ function detect(increase, decrease, size){
       return;
     }
 
-    gap = moment(timeData[index]['time']).diff(fakeTime);
+    gap = moment(timeData.get(index).get('time')).diff(fakeTime);
   }
 
   fakeTime.add(RATE, 'millisecond');
@@ -66,14 +72,18 @@ var App = React.createClass({
       dots: {},
       width: window.innerWidth,
       height: window.innerHeight,
-      loaded: 0,
-      ticking: false
+      init: false,
+      loaded: false,
+      ticking: false,
+      hour: fakeTime.hours(),
+      minute: fakeTime.minutes(),
+      second: fakeTime.seconds()
     };
   },
 
   _increaseDot: function(key){
 
-    stationData[key].radius ++
+    stationData[key].radius += scale(stationData[key].radius)
     stationData[key].radius = stationData[key].radius < 0 ? 0 : stationData[key].radius
 
     this.setState({
@@ -83,11 +93,20 @@ var App = React.createClass({
 
   _decreaseDot: function(key){
 
-    stationData[key].radius --
+    stationData[key].radius -= scale(stationData[key].radius)
     stationData[key].radius = stationData[key].radius < 0 ? 0 : stationData[key].radius
 
     this.setState({
       dots: stationData
+    })
+  },
+
+  _updateTime: function(h, m, s){
+
+    this.setState({
+      hour: h,
+      minute: m,
+      second: s
     })
   },
 
@@ -100,7 +119,7 @@ var App = React.createClass({
 
   handleClick: function(){
     
-    tick(detect.bind(this, this._increaseDot, this._decreaseDot, timeData.length));
+    tick(detect.bind(this, this._increaseDot, this._decreaseDot, this._updateTime, timeData.size));
   
     this.setState({
       ticking: true
@@ -108,7 +127,6 @@ var App = React.createClass({
   },
 
   handleSlide: function(value){
-    console.log(value);
     RATE = 10000 + value * 100;
   },
 
@@ -120,16 +138,17 @@ var App = React.createClass({
     setTimeout(function(){
         
       that.setState({
-        loaded: 1
+        init: true
       });
 
       loadData(function(_timeData, _stationData){
         timeData = _timeData;
+        window.timeData = timeData;
         stationData = _stationData;
 
         that.setState({ 
           dots: _stationData,
-          loaded: 0
+          loaded: true
         });
 
       });
@@ -152,10 +171,20 @@ var App = React.createClass({
       r.div({
         className: 'panel'
       }, [
+
+        r(Clock, assign({
+          date: '09/01/2015',
+          hour: this.state.hour,
+          minute: this.state.minute,
+          second: this.state.second,
+          _className: 'clock'
+        })),
+
         r.button(assign({
           onClick: this.handleClick,
-          disabled: this.state.loaded === 1,
-          className: 'btn'
+          disabled: !this.state.loaded || this.state.ticking,
+          className: 'btn',
+          className: (this.state.loaded && !this.state.ticking) ? 'clickable' : 'unclickable'
         }), 'start'),
 
         r(Rcslider, assign({
@@ -169,7 +198,7 @@ var App = React.createClass({
       ]),
 
       r.div({
-        className: this.state.loaded === 0 ? 'gone' : 'show'
+        className: (this.state.init && !this.state.loaded) ? 'show' : 'gone'
       }, [
         r.p({className: 'loading'}, 'loading data...'),
         r.div({className: 'bg'})

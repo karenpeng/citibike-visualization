@@ -14,22 +14,29 @@ html, body{
   position: fixed;
   bottom: 0;
   padding: 10px;
-  width: 100%;
+  width: 400px;
 }
 
-.btn{
+button{
   display: inline;
   margin: 20px;
   width: 100px;
-/*  border: 2px solid white;
-  border-radius: 12px;*/
+  border: 2px solid white;
+  border-radius: 12px;
   height: 39px;
-/*  background-color: #1FBAD6;
   color: white;
-  font-size: 16px;*/
+  font-size: 16px;
 }
 
-.btn:hover{
+.clickable{
+  background-color: #1FBAD6;
+}
+
+.unclickable{
+  background-color: #e9e9e9;
+}
+
+.clickable:hover{
   cursor: pointer;
 }
 
@@ -43,7 +50,9 @@ html, body{
   margin-top: -20px;
   margin-left: -200px;
   text-align: center;
-  color: #666;
+  color: black;
+  background-color: white;
+  opacity: 0.7;
 }
 
 .bg{
@@ -59,4 +68,16 @@ html, body{
 
 .gone{
   display: none;
+}
+
+.date{
+  margin: 10px 20px;
+  font-size: 30px;
+  color: #666;
+}
+
+.clock{
+  margin: 10px 20px;
+  font-size: 50px;
+  color: #555;
 }
