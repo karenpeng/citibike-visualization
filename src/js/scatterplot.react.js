@@ -39,7 +39,9 @@ var ScatterplotOverlayExample = React.createClass({
     width: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
     //locations: React.PropTypes.instanceOf(Immutable.List)
-    dots: React.PropTypes.object.isRequired
+    dots: React.PropTypes.object.isRequired,
+    bgColor: React.PropTypes.string,
+    bgAlpha: React.PropTypes.number
   },
 
   getDefaultProps: function getDefaultProps(){
@@ -85,7 +87,9 @@ var ScatterplotOverlayExample = React.createClass({
         dots: this.props.dots,
         globalOpacity: 1,
         compositeOperation: 'screen',
-        zoom: this.state.zoom
+        zoom: this.state.zoom,
+        bgColor: this.props.bgColor,
+        bgAlpha: this.props.bgAlpha
       })
     ]);
   }

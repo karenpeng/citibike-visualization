@@ -25,7 +25,7 @@ button{
   display: inline;
   margin: 20px;
   width: 100px;
-  border: 2px solid white;
+  border: 2px solid #ddd;
   border-radius: 12px;
   height: 39px;
   color: white;
@@ -80,6 +80,12 @@ button{
 
 .gone{
   display: none;
+}
+
+.total{
+  margin: 20px;
+  font-size: 30px;
+  color: #aaa;
 }
 
 .date{

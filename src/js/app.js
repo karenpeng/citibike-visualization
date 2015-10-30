@@ -13,10 +13,10 @@ var r = require('r-dom');
 var getAccessToken = require('./util/token');
 var token = require('./../../token.json').token[2];
 
-//var Immutable = require('immutable');
 var d3 = require('d3');
 var assign = require('object-assign');
 var moment = require('moment');
+//var SkyColor = require('sky-color-generator');
 var requestAnimationFrame = require('./util/requestAnimationFrame');
 var loadData = require('./data.processing');
 
@@ -27,8 +27,10 @@ var fakeTime = moment("2015/09/01 00:00:00").subtract(RATE, 'millisecond');
 var timeData;
 var size;
 var stationData = {};
+var total = 0;
 
-var scale = d3.scale.linear().range([0, 1]).domain([30, 1])
+var scale = d3.scale.linear().range([0, 1.5]).domain([36, 1]);
+//var skyColor = new SkyColor();
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
@@ -36,43 +38,6 @@ function tick(cb){
     tick(cb);
   });
   cb();
-}
-
-function detect(increase, decrease, updateTime, dayAndNight){
-
-  var d = fakeTime.date();
-  var h = +fakeTime.hours();
-
-  dayAndNight((h < 18 && h >= 6));
-
-  updateTime(fakeTime.month(), d, h, fakeTime.minutes(), fakeTime.seconds());
-
-  var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
-
-  while(gap <= 0){
-
-    if(timeData.get(index).get('prop') === 'start'){
-      decrease(timeData.get(index).get('id'));
-    }else{
-      increase(timeData.get(index).get('id'));
-    }
-
-    index ++;
-    
-    if(index >= size - 1 || d === 3){
-      console.log('STOP!')
-      this.setState({
-        done: true
-      })
-      window.cancelAnimationFrame(animationID);
-      return;
-    }
-
-    gap = moment(timeData.get(index).get('time')).diff(fakeTime);
-  }
-
-  fakeTime.add(RATE, 'millisecond');
-
 }
 
 var App = React.createClass({
@@ -87,13 +52,14 @@ var App = React.createClass({
       init: false,
       loaded: false,
       ticking: false,
-      month: fakeTime.month(),
-      date: fakeTime.date(),
-      hour: fakeTime.hours(),
-      minute: fakeTime.minutes(),
-      second: fakeTime.seconds(),
+      month: 0,
+      date: 0,
+      hour: 0,
+      minute: 0,
+      second: 0,
       isDay: false,
-      done: false
+      done: false,
+      total: 0
     };
   },
 
@@ -106,22 +72,6 @@ var App = React.createClass({
     stationData[key].radius = stationData[key].radius < 0 ? 0 : stationData[key].radius;
   },
 
-  _updateTime: function(mo, d, h, m, s){
-    this.setState({
-      month: mo,
-      date: d,
-      hour: h,
-      minute: m,
-      second: s
-    });
-  },
-
-  _dayAndNight: function(day){
-    this.setState({
-      isDay: day
-    });
-  },
-
   handleResize: function(){
     this.setState({
       width: window.innerWidth,
@@ -132,7 +82,7 @@ var App = React.createClass({
   handleClick: function(){
 
     if(!this.state.ticking){    
-      tick(detect.bind(this, this._increaseDot, this._decreaseDot, this._updateTime, this._dayAndNight));
+      tick(this.animate);
     
       this.setState({
         ticking: true
@@ -151,7 +101,6 @@ var App = React.createClass({
 
   handleSlide: function(value){
     RATE = 20000 + value * 2000;
-    console.log(RATE);
   },
 
   componentDidMount: function(){
@@ -182,10 +131,56 @@ var App = React.createClass({
     }, 5000);
   },
 
+  animate: function(){
+
+    var d = fakeTime.date();
+    var h = +fakeTime.hours();
+
+    this.setState({
+      month: fakeTime.month(),
+      date: d,
+      hour: h,
+      minute: fakeTime.minutes(),
+      second: fakeTime.seconds(),
+      isDay: (h < 18 && h >= 6)
+    })
+
+    var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
+
+    while(gap <= 0){
+
+      if(timeData.get(index).get('prop') === 'start'){
+        this._decreaseDot(timeData.get(index).get('id'));
+      }else{
+        total++;
+        this.setState({
+          total: total
+        });
+        this._increaseDot(timeData.get(index).get('id'));
+      }
+
+      index ++;
+      
+      if(index >= size - 1 || d === 3){
+        console.log('STOP!')
+        this.setState({
+          done: true
+        })
+        window.cancelAnimationFrame(animationID);
+        return;
+      }
+
+      gap = moment(timeData.get(index).get('time')).diff(fakeTime);
+    }
+
+    fakeTime.add(RATE, 'millisecond');
+
+  },
+
   render: function(){
 
     var buttonClass = this.state.ticking ? 'pause' : 'start';
-    buttonClass = !this.state.loaded ? 'unclickable' : buttonClass;
+    buttonClass = !this.state.loaded || this.state.done ? 'unclickable' : buttonClass;
     
     return r.div({}, [
       r(ScatterplotExample, assign({
@@ -195,12 +190,18 @@ var App = React.createClass({
         //mapboxApiAccessToken: getAccessToken(),
         mapboxApiAccessToken: token,
         dots: this.state.dots,
-        mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8'
+        //mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8'
+        bgColor: '#000000',
+        bgAlpha: 0.4
       })),
 
       r.div({
         className: 'panel'
       }, [
+
+        r.h2({
+          className: 'total'
+        }, 'Total Rides: ' + this.state.total),
 
         r(Clock, assign({
           month: this.state.month,
