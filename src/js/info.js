@@ -13,7 +13,7 @@ var Info = React.createClass({
       }, [
         r.h1({
           className: 'title'
-        },'Citibike Data Visualization'),
+        },'Citibike Ride Visualization'),
         r.div({
           className: 'subtitle'
         }, [
