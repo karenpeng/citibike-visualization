@@ -16,7 +16,6 @@
     "alphaify": "^1.0.0",
     "bowser": "^0.7.3",
     "canvas-composite-types": "^1.0.0",
-    "csv-streamify": "^2.0.0",
     "d3": "^3.5.5",
     "debounce": "^1.0.0",
     "gl-matrix": "^2.3.1",
@@ -31,6 +30,7 @@
   },
   "devDependencies": {
     "browserify": "^11.2.0",
+    "csv-parser": "^1.8.0",
     "envify": "^3.4.0",
     "gulp": "^3.9.0",
     "gulp-mocha": "^2.1.3",

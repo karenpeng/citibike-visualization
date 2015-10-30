@@ -1,5 +1,6 @@
 node_modules
 npm-debug.log
 build
-data/201509-citibike-tripdata.csv
+raw_data
+!raw_data/test.csv
 token.json
