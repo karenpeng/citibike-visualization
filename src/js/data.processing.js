@@ -3,6 +3,8 @@
 var Immutable = require('immutable');
 var moment = require('moment');
 var d3 = require('d3');
+var csv = require('csv-streamify');
+var fs = require('fs');
 
 /**
  * [parseTime description]
@@ -21,7 +23,7 @@ function parseTime(s){
 
 function loadData(cb){
 
-  d3.csv('/data/_91.csv', function(err, data){
+  d3.csv('./../data/_91.csv', function(err, data){
     if(err){
       console.log(err);
       return;
