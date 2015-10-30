@@ -16,7 +16,7 @@ a{
 
 .panel{
   position: fixed;
-  bottom: 0;
+  bottom: 30px;
   padding: 10px;
   width: 400px;
 }
@@ -37,7 +37,7 @@ button{
 }
 
 .pause{
-  background-color: #00A6E6;
+  background-color: #777;
 }
 
 .unclickable{
@@ -83,9 +83,9 @@ button{
 }
 
 .total{
-  margin: 20px;
+  margin: 30px 20px;
   font-size: 30px;
-  color: #aaa;
+  color: #ccc;
 }
 
 .date{
@@ -94,7 +94,7 @@ button{
 }
 
 .clock{
-  margin: 10px 20px;
+  margin: 10px 20px 60px 20px;
   font-size: 50px;
 }
 
@@ -172,9 +172,9 @@ button{
   }
 }
 .loading-spinner {
-  -webkit-animation-duration: 0.75s;
-  -moz-animation-duration: 0.75s;
-  animation-duration: 0.75s;
+  -webkit-animation-duration: 0.5s;
+  -moz-animation-duration: 0.5s;
+  animation-duration: 0.5s;
   -webkit-animation-iteration-count: infinite;
   -moz-animation-iteration-count: infinite;
   animation-iteration-count: infinite;

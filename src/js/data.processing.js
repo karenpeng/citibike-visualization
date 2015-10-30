@@ -2,6 +2,7 @@
 
 var Immutable = require('immutable');
 var moment = require('moment');
+var d3 = require('d3');
 
 /**
  * [parseTime description]
@@ -70,7 +71,7 @@ function loadData(cb){
             'loc': d['loc'],
             //'radius': 1
             //@TODO: figure out how to set default radius properly
-            'radius': 6
+            'radius': 5
           }
         }else{
           // if(d['prop'] === 'start'){

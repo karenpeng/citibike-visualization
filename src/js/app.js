@@ -29,7 +29,7 @@ var size;
 var stationData = {};
 var total = 0;
 
-var scale = d3.scale.linear().range([0, 1.5]).domain([36, 1]);
+var scale = d3.scale.linear().range([0, 1.5]).domain([28, 1]);
 //var skyColor = new SkyColor();
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
@@ -63,8 +63,49 @@ var App = React.createClass({
     };
   },
 
+  handleResize: function(){
+    this.setState({
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+  },
+
+  componentDidMount: function(){
+    window.addEventListener('resize', this.handleResize, false);
+
+    var that = this;
+
+    //@TODO: figure out how to do this without settimeout maybe?
+    //cus the loading blocks the loading of the map
+    setTimeout(function(){
+        
+      that.setState({
+        init: true
+      });
+
+      loadData(function(_timeData, _stationData){
+        timeData = _timeData;
+        size = _timeData.size;
+        stationData = _stationData;
+
+        that.setState({ 
+          dots: _stationData,
+          loaded: true,
+          month: fakeTime.month(),
+          date: fakeTime.date(),
+          hour: fakeTime.hours(),
+          minute: fakeTime.minutes(),
+          second: fakeTime.seconds()
+        });
+
+      });
+
+    }, 5000);
+  },
+
   _increaseDot: function(key){
     stationData[key].radius += scale(stationData[key].radius);
+    stationData[key].radius = stationData[key].radius > 26 ? 26 : stationData[key].radius;
   },
 
   _decreaseDot: function(key){
@@ -72,12 +113,52 @@ var App = React.createClass({
     stationData[key].radius = stationData[key].radius < 0 ? 0 : stationData[key].radius;
   },
 
-  handleResize: function(){
+  animate: function(){
+
+    var d = fakeTime.date();
+    var h = +fakeTime.hours();
+
     this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
+      month: fakeTime.month(),
+      date: d,
+      hour: h,
+      minute: fakeTime.minutes(),
+      second: fakeTime.seconds()//,
+      //isDay: (h < 18 && h >= 6)
+    })
+
+    var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
+
+    while(gap <= 0){
+
+      if(timeData.get(index).get('prop') === 'start'){
+        this._decreaseDot(timeData.get(index).get('id'));
+      }else{
+        // total++;
+        // this.setState({
+        //   total: total
+        // });
+        this._increaseDot(timeData.get(index).get('id'));
+      }
+
+      index ++;
+      
+      if(index >= size - 1 || d === 4){
+        console.log('STOP!')
+        this.setState({
+          done: true
+        })
+        window.cancelAnimationFrame(animationID);
+        return;
+      }
+
+      gap = moment(timeData.get(index).get('time')).diff(fakeTime);
+    }
+
+    fakeTime.add(RATE, 'millisecond');
+
   },
+
 
   handleClick: function(){
 
@@ -103,80 +184,6 @@ var App = React.createClass({
     RATE = 20000 + value * 2000;
   },
 
-  componentDidMount: function(){
-    window.addEventListener('resize', this.handleResize, false);
-
-    var that = this;
-
-    //@TODO: figure out how to do this without settimeout maybe?
-    //cus the loading blocks the loading of the map
-    setTimeout(function(){
-        
-      that.setState({
-        init: true
-      });
-
-      loadData(function(_timeData, _stationData){
-        timeData = _timeData;
-        size = _timeData.size;
-        stationData = _stationData;
-
-        that.setState({ 
-          dots: _stationData,
-          loaded: true
-        });
-
-      });
-
-    }, 5000);
-  },
-
-  animate: function(){
-
-    var d = fakeTime.date();
-    var h = +fakeTime.hours();
-
-    this.setState({
-      month: fakeTime.month(),
-      date: d,
-      hour: h,
-      minute: fakeTime.minutes(),
-      second: fakeTime.seconds(),
-      isDay: (h < 18 && h >= 6)
-    })
-
-    var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
-
-    while(gap <= 0){
-
-      if(timeData.get(index).get('prop') === 'start'){
-        this._decreaseDot(timeData.get(index).get('id'));
-      }else{
-        total++;
-        this.setState({
-          total: total
-        });
-        this._increaseDot(timeData.get(index).get('id'));
-      }
-
-      index ++;
-      
-      if(index >= size - 1 || d === 3){
-        console.log('STOP!')
-        this.setState({
-          done: true
-        })
-        window.cancelAnimationFrame(animationID);
-        return;
-      }
-
-      gap = moment(timeData.get(index).get('time')).diff(fakeTime);
-    }
-
-    fakeTime.add(RATE, 'millisecond');
-
-  },
-
   render: function(){
 
     var buttonClass = this.state.ticking ? 'pause' : 'start';
@@ -199,9 +206,9 @@ var App = React.createClass({
         className: 'panel'
       }, [
 
-        r.h2({
-          className: 'total'
-        }, 'Total Rides: ' + this.state.total),
+        // r.h2({
+        //   className: 'total'
+        // }, 'Total Rides: ' + this.state.total),
 
         r(Clock, assign({
           month: this.state.month,
