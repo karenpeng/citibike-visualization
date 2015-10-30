@@ -3,4 +3,5 @@ npm-debug.log
 build
 raw_data
 !raw_data/test.csv
+processed_data
 token.json

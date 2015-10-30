@@ -10,7 +10,7 @@ var moment = require('moment');
 //var SkyColor = require('sky-color-generator');
 var requestAnimationFrame = require('./util/requestAnimationFrame');
 var getAccessToken = require('./util/token');
-var token = require('./../../processed_data/token.json').token[2];
+var token = require('./../../processed_data/token.json').token[1];
 
 var ScatterplotExample = require('./ui/scatterplot.react');
 var Clock = require('./ui/clock');
@@ -89,7 +89,7 @@ var App = React.createClass({
           dots: data
         });
 
-        d3.json('./../../processed_data/91.0.json', function(err, data){
+        d3.json('./../../processed_data/9123.json', function(err, data){
           
           timeData = data['records'];
           console.dir(timeData);
