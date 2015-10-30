@@ -22,13 +22,13 @@ var loadData = require('./data.processing');
 
 var animationID;
 var index = 0;
-var RATE = 10000;
+var RATE = 20000;
 var fakeTime = moment("2015/09/01 00:00:00").subtract(RATE, 'millisecond');
 var timeData;
 var size;
 var stationData = {};
 
-var scale = d3.scale.linear().range([0, 1]).domain([24, 1])
+var scale = d3.scale.linear().range([0, 1]).domain([30, 1])
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
@@ -61,6 +61,9 @@ function detect(increase, decrease, updateTime, dayAndNight){
     
     if(index >= size - 1 || d === 3){
       console.log('STOP!')
+      this.setState({
+        done: true
+      })
       window.cancelAnimationFrame(animationID);
       return;
     }
@@ -89,7 +92,8 @@ var App = React.createClass({
       hour: fakeTime.hours(),
       minute: fakeTime.minutes(),
       second: fakeTime.seconds(),
-      isDay: false
+      isDay: false,
+      done: false
     };
   },
 
@@ -126,16 +130,28 @@ var App = React.createClass({
   },
 
   handleClick: function(){
+
+    if(!this.state.ticking){    
+      tick(detect.bind(this, this._increaseDot, this._decreaseDot, this._updateTime, this._dayAndNight));
     
-    tick(detect.bind(this, this._increaseDot, this._decreaseDot, this._updateTime, this._dayAndNight));
-  
-    this.setState({
-      ticking: true
-    });
+      this.setState({
+        ticking: true
+      });
+
+    }else{
+      console.log('STOP!')
+      window.cancelAnimationFrame(animationID);
+
+      this.setState({
+        ticking: false
+      });
+    }
+
   },
 
   handleSlide: function(value){
-    RATE = 10000 + value * 6000;
+    RATE = 20000 + value * 2000;
+    console.log(RATE);
   },
 
   componentDidMount: function(){
@@ -167,6 +183,9 @@ var App = React.createClass({
   },
 
   render: function(){
+
+    var buttonClass = this.state.ticking ? 'pause' : 'start';
+    buttonClass = !this.state.loaded ? 'unclickable' : buttonClass;
     
     return r.div({}, [
       r(ScatterplotExample, assign({
@@ -194,9 +213,10 @@ var App = React.createClass({
         r(Control, assign({
           handleClick: this.handleClick,
           handleSlide: this.handleSlide,
-          buttonDisabled:!this.state.loaded || this.state.ticking,
-          sliderDisabled: !this.state.ticking,
-          buttonClassName: (this.state.loaded && !this.state.ticking) ? 'clickable' : 'unclickable'
+          buttonDisabled:!this.state.loaded || this.state.done,
+          sliderDisabled: !this.state.ticking || !this.state.loaded || this.state.done,
+          buttonClassName: buttonClass,
+          buttonString: this.state.ticking? 'pause' : 'start'
         }))
 
       ]),

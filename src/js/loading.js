@@ -14,8 +14,8 @@ var Loading = React.createClass({
     return r.div({
         className: this.props.loadingClassName
       }, [
-        r.p({className: 'loading'}, 'loading data...'),
-        r.div({className: 'bg'})
+        r.span({className: 'loading'}, 'loading '),
+        r.span({className: 'loading-spinner'})
       ])
   }
 

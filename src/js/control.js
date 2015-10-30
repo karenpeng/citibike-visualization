@@ -12,7 +12,8 @@ var ControlPanel = React.createClass({
     handleSlide: React.PropTypes.func,
     buttonDisabled: React.PropTypes.bool,
     sliderDisabled: React.PropTypes.bool,
-    buttonClassName: React.PropTypes.string
+    buttonClassName: React.PropTypes.string,
+    buttonString: React.PropTypes.string
   },
 
   render: function(){
@@ -22,7 +23,7 @@ var ControlPanel = React.createClass({
         onClick: this.props.handleClick,
         disabled: this.props.buttonDisabled,
         className: this.props.buttonClassName
-      }), 'start'),
+      }), this.props.buttonString),
 
       r(Rcslider, assign({
         onChange: this.props.handleSlide,
