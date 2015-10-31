@@ -1,4 +1,4 @@
-//just run this file with node
+//run this file with node
 'use strict';
 
 var fs = require('fs');
@@ -6,12 +6,12 @@ var csv = require('csv-parser');
 var moment = require('moment');
 
 var files = [
-  "91.0",
-  "91.1",
-  "92.0",
-  "92.1",
-  "93.0",
-  "93.1"
+  "./../../../raw_data/91.0.csv",
+  "./../../../raw_data/91.1.csv",
+  "./../../../raw_data/92.0.csv",
+  "./../../../raw_data/92.1.csv",
+  "./../../../raw_data/93.0.csv",
+  "./../../../raw_data/93.1.csv"
 ];
 
 var index = 0;
@@ -20,6 +20,7 @@ var _data1 = [], _data2 = [];
 var stationData = {};
 var timeData;
 
+//Ready? Go!!!!
 sequence(files);
 
 function sequence(files){
@@ -28,26 +29,23 @@ function sequence(files){
 
   if(files.length === 0){
     process(file, onEnd);
-    return;
   }else{
     process(file, function(){
-      sequence(files, null);
+      sequence(files);
     });
   }
 }
 
 function process(file, cb){
 
-  var dir = "./../../../raw_data/" + file + ".csv";
-
-  fs.createReadStream(dir)
+  fs.createReadStream(file)
     .pipe(csv())
     .on("data", function(data){
       //console.log(data);
       onData(data);
     })
     .on("end", function(){
-      cb(file);
+      cb();
       console.log("done");
     });
 }
@@ -76,23 +74,23 @@ function onData(obj){
   if(!stationData.hasOwnProperty(obj['start station id'])){
     stationData[obj['start station id']] = {
       'loc': [+obj['start station latitude'], +obj['start station longitude']],
-      //'radius': 1
-      //@TODO: figure out how to set default radius properly
-      'radius': 5
+      'radius': 0,
+      'min': 0,
+      'count': 0
     }
   }
 
   if(!stationData.hasOwnProperty(obj['stop station id'])){
     stationData[obj['end station id']] = {
       'loc': [+obj['end station latitude'], +obj['end station longitude']],
-      //'radius': 1
-      //@TODO: figure out how to set default radius properly
-      'radius': 5
+      'radius': 0,
+      'min': 0,
+      'count': 0
     }
   }
 }
 
-function onEnd(file){
+function onEnd(){
   console.log('processing time...')
   timeData = (_data1.concat(_data2))
     .sort(function(a, b){
@@ -102,8 +100,8 @@ function onEnd(file){
 
   console.log('start writing file...')
 
-  fs.writeFileSync("./../../../processed_data/stations.json", JSON.stringify(stationData), 'utf-8');
-  fs.writeFileSync("./../../../processed_data/"+file+".json", JSON.stringify({'records':timeData}), 'utf-8');
+  fs.writeFileSync("./../../../processed_data/_stations.json", JSON.stringify(stationData), 'utf-8');
+  fs.writeFileSync("./../../../processed_data/records.json", JSON.stringify({'records':timeData}), 'utf-8');
 }
 
 /**

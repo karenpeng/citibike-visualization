@@ -28,7 +28,7 @@ var timeData;
 var stationData = {};
 var total = 0;
 
-var scale = d3.scale.linear().range([0, 1.5]).domain([28, 1]);
+var scale = d3.scale.sqrt().range([0, 30]).domain([0, 60]);
 //var skyColor = new SkyColor();
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
@@ -74,22 +74,21 @@ var App = React.createClass({
 
     var that = this;
 
-    //@TODO: figure out how to do this without settimeout maybe?
-    //cus the loading blocks the loading of the map
+    that.setState({
+      init: true
+    });
 
+    //wait for mapbox to loaded
     setTimeout(function(){
-
-      that.setState({
-        init: true
-      });
-
       d3.json('./../../processed_data/stations.json', function(err, data){
 
+        stationData = data;
         that.setState({
-          dots: data
+          dots: stationData
         });
+        console.dir(stationData);
 
-        d3.json('./../../processed_data/9123.json', function(err, data){
+        d3.json('./../../processed_data/records.json', function(err, data){
           
           timeData = data['records'];
           console.dir(timeData);
@@ -104,21 +103,21 @@ var App = React.createClass({
           });
         });
 
-      })
+      });
+    }, 2000);
 
-
-
-    }, 5000);
   },
 
   _increaseDot: function(key){
-    stationData[key].radius += scale(stationData[key].radius);
-    stationData[key].radius = stationData[key].radius > 26 ? 26 : stationData[key].radius;
+    stationData[key]['count'] ++;
+    stationData[key]['radius'] = d3.round(scale(stationData[key]['count']), 1);
   },
 
   _decreaseDot: function(key){
-    stationData[key].radius -= scale(stationData[key].radius);
-    stationData[key].radius = stationData[key].radius < 0 ? 0 : stationData[key].radius;
+    stationData[key]['count'] --;
+    //something wrong with the data
+    stationData[key]['count'] = stationData[key]['count'] < 0 ? 0 : stationData[key]['count'];
+    stationData[key]['radius'] = d3.round(scale(stationData[key]['count']), 1);
   },
 
   animate: function(){
@@ -131,8 +130,8 @@ var App = React.createClass({
       date: d,
       hour: h,
       minute: fakeTime.minutes(),
-      second: fakeTime.seconds()//,
-      //isDay: (h < 18 && h >= 6)
+      second: fakeTime.seconds(),
+      isDay: (h < 18 && h >= 6)
     })
 
     var gap = moment(timeData[index]['time']).diff(fakeTime);
@@ -200,7 +199,7 @@ var App = React.createClass({
         //mapboxApiAccessToken: getAccessToken(),
         mapboxApiAccessToken: token,
         dots: this.state.dots,
-        //mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8'
+        mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8',
         bgColor: '#000000',
         bgAlpha: 0.4
       })),
