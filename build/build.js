@@ -67759,7 +67759,7 @@ var Clock = React.createClass({
     var _m = (this.props.month+1) < 10 ? '0'+(this.props.month+1) : (this.props.month+1);
     var _d = this.props.date < 10 ? '0'+this.props.date : this.props.date;
 
-    var dateStyle = {color: this.props.hour >= 6 && this.props.hour < 18 ? '#666' : '#aaa'}
+    var dateStyle = {color: this.props.hour >= 6 && this.props.hour < 18 ? '#666' : '#bbb'}
     var clockStyle = {color: this.props.hour >=6 && this.props.hour < 18 ? '#444' : '#ddd'}
 
     return r.div({},[
