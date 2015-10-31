@@ -67570,9 +67570,14 @@ var App = React.createClass({
       init: true
     });
 
-    //wait for mapbox to loaded
+    //wait for mapbox to load
     setTimeout(function(){
       d3.json('./../processed_data/stations.json', function(err, data){
+
+        if(err){
+          console.log(err);
+          return;
+        }
 
         stationData = data;
         that.setState({
@@ -67581,6 +67586,11 @@ var App = React.createClass({
         console.dir(stationData);
 
         d3.json('./../processed_data/records.json', function(err, data){
+
+          if(err){
+            console.log(err);
+            return;
+          }
           
           timeData = data['records'];
           console.dir(timeData);
@@ -67591,7 +67601,8 @@ var App = React.createClass({
             date: fakeTime.date(),
             hour: fakeTime.hours(),
             minute: fakeTime.minutes(),
-            second: fakeTime.seconds()
+            second: fakeTime.seconds(),
+            isDay: (h < 18 && h >= 6)
           });
         });
 
