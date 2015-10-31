@@ -17,11 +17,12 @@ var Info = React.createClass({
         r.div({
           className: 'subtitle'
         }, [
-          r.span('data source :  '),
+          r.span({className: 'duration'}, '09/01/2015 - 09/03/2015'),
+          r.span(' ( data source :  '),
           r.a(assign({
             className: 'link',
             href: 'https://www.citibikenyc.com/system-data'
-          }), 'citibike system data')
+          }), 'citibike system data )')
         ])
       ])
   }

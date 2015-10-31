@@ -114,13 +114,17 @@ button{
   color: white;
 }
 
+.duration{
+  color: #eee;
+}
+
 .subtitle{
   color: #ccc;
   font-size: 12px;
 }
 
 .link{
-  color: #eee;
+  color: #ccc;
 }
 
 @-webkit-keyframes rotate-forever {
