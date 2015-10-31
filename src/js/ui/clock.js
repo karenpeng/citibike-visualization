@@ -24,7 +24,9 @@ var Clock = React.createClass({
     var dateStyle = {color: this.props.hour >= 6 && this.props.hour < 18 ? '#666' : '#bbb'}
     var clockStyle = {color: this.props.hour >=6 && this.props.hour < 18 ? '#444' : '#ddd'}
 
-    return r.div({},[
+    return r.div({
+      className: 'time'
+    },[
 
       r.p({
         className: 'date',

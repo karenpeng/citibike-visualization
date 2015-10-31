@@ -18,7 +18,9 @@ var ControlPanel = React.createClass({
 
   render: function(){
 
-    return r.div({},[
+    return r.div({
+      className: 'panel'
+    },[
       r.button(assign({
         onClick: this.props.handleClick,
         disabled: this.props.buttonDisabled,

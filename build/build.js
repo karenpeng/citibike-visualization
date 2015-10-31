@@ -1010,8 +1010,7 @@ var ScatterplotOverlay = React.createClass({
     compositeOperation: React.PropTypes.oneOf(COMPOSITE_TYPES),
     dots: React.PropTypes.object,
     zoom: React.PropTypes.number,
-    bgColor: React.PropTypes.string,
-    bgAlpha: React.PropTypes.number
+    bgColor: React.PropTypes.string
   },
 
   getDefaultProps: function getDefaultProps() {
@@ -1052,9 +1051,9 @@ var ScatterplotOverlay = React.createClass({
     ctx.clearRect(0, 0, props.width, props.height);
     //ctx.globalCompositeOperation = this.props.compositeOperation;
     
-    // ctx.fillStyle = alphaify(this.props.bgColor, this.props.bgAlpha);
-    // ctx.fillRect(0, 0, props.width, props.height);
-    // ctx.fill();
+    ctx.fillStyle = this.props.bgColor;
+    ctx.fillRect(0, 0, props.width, props.height);
+    ctx.fill();
 
     if ((this.props.renderWhileDragging || !this.props.isDragging) &&
       this.props.dots // this.props.locations
@@ -67500,16 +67499,16 @@ var assign = require('object-assign');
 var d3 = require('d3');
 var moment = require('moment');
 //var SkyColor = require('sky-color-generator');
-var requestAnimationFrame = require('./js/util/requestAnimationFrame');
-var getAccessToken = require('./js/util/token');
-var token = require('./../processed_data/token.json').token[1];
+var requestAnimationFrame = require('./util/requestAnimationFrame');
+var getAccessToken = require('./util/token');
+var token = require('./../../processed_data/token.json').token[1];
 
-var ScatterplotExample = require('./js/ui/scatterplot.react');
-var Clock = require('./js/ui/clock');
+var ScatterplotExample = require('./ui/scatterplot.react');
+var Clock = require('./ui/clock');
 var Rcslider = require('rc-slider');
-var Control = require('./js/ui/control');
-var Loading = require('./js/ui/loading');
-var Info = require('./js/ui/info');
+var Control = require('./ui/control');
+var Loading = require('./ui/loading');
+var Info = require('./ui/info');
 
 var animationID;
 var index = 0;
@@ -67634,7 +67633,8 @@ var App = React.createClass({
       hour: h,
       minute: fakeTime.minutes(),
       second: fakeTime.seconds(),
-      isDay: (h < 18 && h >= 6)
+      isDay: (h < 18 && h >= 6)//,
+      //skyColor: skyColor(h)
     })
 
     var gap = moment(timeData[index]['time']).diff(fakeTime);
@@ -67703,36 +67703,29 @@ var App = React.createClass({
         mapboxApiAccessToken: token,
         dots: this.state.dots,
         mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8',
-        bgColor: '#000000',
-        bgAlpha: 0.4
+        bgColor: 'rgba(0, 100, 200, 0)'
       })),
 
-      r.div({
-        className: 'panel'
-      }, [
+      r(Clock, assign({
+        month: this.state.month,
+        date: this.state.date,
+        hour: this.state.hour,
+        minute: this.state.minute,
+        second: this.state.second
+      })),
 
-        // r.h2({
-        //   className: 'total'
-        // }, 'Total Rides: ' + this.state.total),
+      // r.h2({
+      //   className: 'total'
+      // }, 'Total Rides: ' + this.state.total),
 
-        r(Clock, assign({
-          month: this.state.month,
-          date: this.state.date,
-          hour: this.state.hour,
-          minute: this.state.minute,
-          second: this.state.second
-        })),
-
-        r(Control, assign({
-          handleClick: this.handleClick,
-          handleSlide: this.handleSlide,
-          buttonDisabled:!this.state.loaded || this.state.done,
-          sliderDisabled: !this.state.ticking || !this.state.loaded || this.state.done,
-          buttonClassName: buttonClass,
-          buttonString: this.state.ticking? 'pause' : 'start'
-        }))
-
-      ]),
+      r(Control, assign({
+        handleClick: this.handleClick,
+        handleSlide: this.handleSlide,
+        buttonDisabled:!this.state.loaded || this.state.done,
+        sliderDisabled: !this.state.ticking || !this.state.loaded || this.state.done,
+        buttonClassName: buttonClass,
+        buttonString: this.state.ticking? 'pause' : 'start'
+      })),
 
       r(Loading, assign({
         loadingClassName: (this.state.init && !this.state.loaded) ? 'show' : 'gone'
@@ -67746,7 +67739,7 @@ var App = React.createClass({
 
 React.render(r(App), document.getElementById('chart'));
 
-},{"./../processed_data/token.json":362,"./js/ui/clock":364,"./js/ui/control":365,"./js/ui/info":366,"./js/ui/loading":367,"./js/ui/scatterplot.react":368,"./js/util/requestAnimationFrame":369,"./js/util/token":370,"d3":18,"global/document":47,"global/window":48,"moment":165,"object-assign":166,"r-dom":170,"rc-slider":180,"react":351}],364:[function(require,module,exports){
+},{"./../../processed_data/token.json":362,"./ui/clock":364,"./ui/control":365,"./ui/info":366,"./ui/loading":367,"./ui/scatterplot.react":368,"./util/requestAnimationFrame":369,"./util/token":370,"d3":18,"global/document":47,"global/window":48,"moment":165,"object-assign":166,"r-dom":170,"rc-slider":180,"react":351}],364:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -67773,7 +67766,9 @@ var Clock = React.createClass({
     var dateStyle = {color: this.props.hour >= 6 && this.props.hour < 18 ? '#666' : '#bbb'}
     var clockStyle = {color: this.props.hour >=6 && this.props.hour < 18 ? '#444' : '#ddd'}
 
-    return r.div({},[
+    return r.div({
+      className: 'time'
+    },[
 
       r.p({
         className: 'date',
@@ -67817,7 +67812,9 @@ var ControlPanel = React.createClass({
 
   render: function(){
 
-    return r.div({},[
+    return r.div({
+      className: 'panel'
+    },[
       r.button(assign({
         onClick: this.props.handleClick,
         disabled: this.props.buttonDisabled,
@@ -67939,8 +67936,7 @@ var ScatterplotOverlayExample = React.createClass({
     height: React.PropTypes.number.isRequired,
     //locations: React.PropTypes.instanceOf(Immutable.List)
     dots: React.PropTypes.object.isRequired,
-    bgColor: React.PropTypes.string,
-    bgAlpha: React.PropTypes.number
+    bgColor: React.PropTypes.string
   },
 
   getDefaultProps: function getDefaultProps(){
@@ -67987,8 +67983,7 @@ var ScatterplotOverlayExample = React.createClass({
         globalOpacity: 1,
         compositeOperation: 'screen',
         zoom: this.state.zoom,
-        bgColor: this.props.bgColor,
-        bgAlpha: this.props.bgAlpha
+        bgColor: this.props.bgColor
       })
     ]);
   }

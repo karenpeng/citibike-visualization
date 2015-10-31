@@ -8,16 +8,16 @@ var assign = require('object-assign');
 var d3 = require('d3');
 var moment = require('moment');
 //var SkyColor = require('sky-color-generator');
-var requestAnimationFrame = require('./js/util/requestAnimationFrame');
-var getAccessToken = require('./js/util/token');
-var token = require('./../processed_data/token.json').token[1];
+var requestAnimationFrame = require('./util/requestAnimationFrame');
+var getAccessToken = require('./util/token');
+var token = require('./../../processed_data/token.json').token[1];
 
-var ScatterplotExample = require('./js/ui/scatterplot.react');
-var Clock = require('./js/ui/clock');
+var ScatterplotExample = require('./ui/scatterplot.react');
+var Clock = require('./ui/clock');
 var Rcslider = require('rc-slider');
-var Control = require('./js/ui/control');
-var Loading = require('./js/ui/loading');
-var Info = require('./js/ui/info');
+var Control = require('./ui/control');
+var Loading = require('./ui/loading');
+var Info = require('./ui/info');
 
 var animationID;
 var index = 0;
@@ -142,7 +142,8 @@ var App = React.createClass({
       hour: h,
       minute: fakeTime.minutes(),
       second: fakeTime.seconds(),
-      isDay: (h < 18 && h >= 6)
+      isDay: (h < 18 && h >= 6)//,
+      //skyColor: skyColor(h)
     })
 
     var gap = moment(timeData[index]['time']).diff(fakeTime);
@@ -211,36 +212,29 @@ var App = React.createClass({
         mapboxApiAccessToken: token,
         dots: this.state.dots,
         mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8',
-        bgColor: '#000000',
-        bgAlpha: 0.4
+        bgColor: 'rgba(0, 100, 200, 0)'
       })),
 
-      r.div({
-        className: 'panel'
-      }, [
+      r(Clock, assign({
+        month: this.state.month,
+        date: this.state.date,
+        hour: this.state.hour,
+        minute: this.state.minute,
+        second: this.state.second
+      })),
 
-        // r.h2({
-        //   className: 'total'
-        // }, 'Total Rides: ' + this.state.total),
+      // r.h2({
+      //   className: 'total'
+      // }, 'Total Rides: ' + this.state.total),
 
-        r(Clock, assign({
-          month: this.state.month,
-          date: this.state.date,
-          hour: this.state.hour,
-          minute: this.state.minute,
-          second: this.state.second
-        })),
-
-        r(Control, assign({
-          handleClick: this.handleClick,
-          handleSlide: this.handleSlide,
-          buttonDisabled:!this.state.loaded || this.state.done,
-          sliderDisabled: !this.state.ticking || !this.state.loaded || this.state.done,
-          buttonClassName: buttonClass,
-          buttonString: this.state.ticking? 'pause' : 'start'
-        }))
-
-      ]),
+      r(Control, assign({
+        handleClick: this.handleClick,
+        handleSlide: this.handleSlide,
+        buttonDisabled:!this.state.loaded || this.state.done,
+        sliderDisabled: !this.state.ticking || !this.state.loaded || this.state.done,
+        buttonClassName: buttonClass,
+        buttonString: this.state.ticking? 'pause' : 'start'
+      })),
 
       r(Loading, assign({
         loadingClassName: (this.state.init && !this.state.loaded) ? 'show' : 'gone'

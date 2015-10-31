@@ -14,16 +14,32 @@ a{
   opacity: 0.5;
 }
 
+.time{
+  position: fixed;
+  top: 130px;
+  left: 20px;
+}
+
+.date{
+  margin-bottom: 20px;
+  font-size: 30px;
+}
+
+.clock{
+  margin-top: 20px;
+  font-size: 50px;
+}
+
 .panel{
   position: fixed;
-  bottom: 40px;
-  padding: 10px;
+  bottom: 60px;
   width: 400px;
+  left: 20px;
 }
 
 button{
   display: inline;
-  margin: 20px;
+  margin-bottom:40px;
   width: 100px;
   border: 2px solid #ddd;
   border-radius: 8px;
@@ -86,16 +102,6 @@ button{
   margin: 30px 20px;
   font-size: 30px;
   color: #ccc;
-}
-
-.date{
-  margin: 10px 20px;
-  font-size: 30px;
-}
-
-.clock{
-  margin: 10px 20px 60px 20px;
-  font-size: 50px;
 }
 
 .info{
