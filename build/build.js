@@ -67513,12 +67513,15 @@ var Info = require('./js/ui/info');
 
 var animationID;
 var index = 0;
-var RATE = 20000;
-var fakeTime = moment("2015-09-01T00:00:00.000Z").subtract(RATE, 'millisecond');
+var rate = 20000;
+var fakeTime = moment("2015-09-01T00:00:00.000Z").subtract(rate, 'millisecond');
 var size;
 var timeData;
 var stationData = {};
 var total = 0;
+
+var stationURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/stations.json';
+var recordURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/records.json';
 
 var scale = d3.scale.sqrt().range([0, 30]).domain([0, 60]);
 //var skyColor = new SkyColor();
@@ -67543,7 +67546,7 @@ var App = React.createClass({
       init: false,
       loaded: false,
       ticking: false,
-      month: 0,
+      month: -1,
       date: 0,
       hour: 0,
       minute: 0,
@@ -67570,7 +67573,7 @@ var App = React.createClass({
       init: true
     });
 
-    d3.json('./../processed_data/stations.json', function(err, data){
+    d3.json(stationURL, function(err, data){
 
       if(err){
         console.log(err);
@@ -67580,7 +67583,7 @@ var App = React.createClass({
       stationData = data;
       //console.dir(stationData);
 
-      d3.json('./../processed_data/records.json', function(err, data){
+      d3.json(recordURL, function(err, data){
 
         if(err){
           console.log(err);
@@ -67623,7 +67626,7 @@ var App = React.createClass({
   animate: function(){
 
     var d = fakeTime.date();
-    var h = +fakeTime.hours();
+    var h = fakeTime.hours();
 
     this.setState({
       month: fakeTime.month(),
@@ -67658,7 +67661,7 @@ var App = React.createClass({
       gap = moment(timeData[index]['time']).diff(fakeTime);
     }
 
-    fakeTime.add(RATE, 'millisecond');
+    fakeTime.add(rate, 'millisecond');
   },
 
 
@@ -67683,7 +67686,7 @@ var App = React.createClass({
   },
 
   handleSlide: function(value){
-    RATE = 20000 + value * 2000;
+    rate = 20000 + value * 2000;
   },
 
   render: function(){
