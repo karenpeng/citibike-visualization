@@ -8,16 +8,16 @@ var assign = require('object-assign');
 var d3 = require('d3');
 var moment = require('moment');
 //var SkyColor = require('sky-color-generator');
-var requestAnimationFrame = require('./util/requestAnimationFrame');
-var getAccessToken = require('./util/token');
-var token = require('./../../processed_data/token.json').token[1];
+var requestAnimationFrame = require('./js/util/requestAnimationFrame');
+var getAccessToken = require('./js/util/token');
+var token = require('./../processed_data/token.json').token[1];
 
-var ScatterplotExample = require('./ui/scatterplot.react');
-var Clock = require('./ui/clock');
+var ScatterplotExample = require('./js/ui/scatterplot.react');
+var Clock = require('./js/ui/clock');
 var Rcslider = require('rc-slider');
-var Control = require('./ui/control');
-var Loading = require('./ui/loading');
-var Info = require('./ui/info');
+var Control = require('./js/ui/control');
+var Loading = require('./js/ui/loading');
+var Info = require('./js/ui/info');
 
 var animationID;
 var index = 0;
@@ -80,7 +80,7 @@ var App = React.createClass({
 
     //wait for mapbox to loaded
     setTimeout(function(){
-      d3.json('./../../processed_data/stations.json', function(err, data){
+      d3.json('./../processed_data/stations.json', function(err, data){
 
         stationData = data;
         that.setState({
@@ -88,7 +88,7 @@ var App = React.createClass({
         });
         console.dir(stationData);
 
-        d3.json('./../../processed_data/records.json', function(err, data){
+        d3.json('./../processed_data/records.json', function(err, data){
           
           timeData = data['records'];
           console.dir(timeData);
