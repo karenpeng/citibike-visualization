@@ -12,7 +12,17 @@ var Immutable = require('immutable');
 var requestAnimationFrame = require('./util/requestAnimationFrame');
 var getAccessToken = require('./util/token');
 var token = require('./../../processed_data/token.json').token[1];
-var mySkyColor = require('./util/skyColor');
+var ColorInterpolate = require('./util/colorInterpolate');
+var mySkyColor = new ColorInterpolate();
+var myDotColor = new ColorInterpolate();
+
+myDotColor.set(0, [160, 222, 255, 1]);
+myDotColor.set(1440, [160, 222, 255, 1]);
+myDotColor.set(360, [112, 189, 245, 1]);
+myDotColor.set(1020, [112, 189, 245, 1]);
+myDotColor.set(420, [73, 124, 187, 1]);
+myDotColor.set(960, [73, 124, 187, 1]);
+
 
 var ScatterplotExample = require('./ui/scatterplot.react');
 var Clock = require('./ui/clock');
@@ -63,8 +73,8 @@ var App = React.createClass({
       isDay: false,
       done: false,
       //total: 0
-      skyColor: 'rgba(0, 0, 0, 0.6)',
-      dotColor: '#00A6E6'
+      skyColor: 'rgba(0, 0, 0, 0.5)',
+      dotColor: 'rgba(0, 0, 0, 0)'
     };
   },
 
@@ -101,6 +111,7 @@ var App = React.createClass({
         var h = fakeTime.hours();
         var m = fakeTime.minutes();
         mySkyColor.init(h * 60 + m);
+        myDotColor.init(h * 60 + m);
 
         that.setState({ 
           dots: stationData,
@@ -111,7 +122,8 @@ var App = React.createClass({
           minute: m,
           second: fakeTime.seconds(),
           isDay: (h < 18 && h > 6),
-          skyColor: mySkyColor.get(h * 60 + m)
+          skyColor: mySkyColor.get(h * 60 + m),
+          dotColor: myDotColor.get(h * 60 + m)
         });
       });
     });
@@ -171,6 +183,7 @@ var App = React.createClass({
 
     if( _minutes === 0){
       mySkyColor.startDay();
+      myDotColor.startDay();
     }
 
     this.setState({
@@ -180,9 +193,9 @@ var App = React.createClass({
       minute: _m,
       second: fakeTime.seconds(),
       isDay: (_h < 18 && _h > 6),
-      skyColor: mySkyColor.get(_minutes)
+      skyColor: mySkyColor.get(_minutes),
+      dotColor: myDotColor.get(_minutes)
     })
-    console.log(mySkyColor.leftBound, mySkyColor.rightBound, mySkyColor.get(_minutes))
 
     var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
 
@@ -226,7 +239,7 @@ var App = React.createClass({
         dots: this.state.dots,
         //mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8',
         bgColor: this.state.skyColor,
-        dotFill: this.state.dotColor
+        dotColor: this.state.dotColor
       })),
 
       r(Clock, assign({

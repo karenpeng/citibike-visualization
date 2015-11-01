@@ -1,6 +1,6 @@
 'use strict';
 
-function SkyColor(){
+function ColorInterpolate(){
   this.steps = [
     {'time': 0, 'color': [0, 0, 0, 0.7]},
     {'time': 360, 'color': [0, 0, 0, 0.5]},
@@ -13,7 +13,7 @@ function SkyColor(){
   this.rightBound = 1;
 }
 
-SkyColor.prototype.set = function(minute, color) {
+ColorInterpolate.prototype.set = function(minute, color) {
   for(var i = 0; i < this.steps.length; i++){
     var _obj = this.steps[i];
     if(_obj['time'] === minute){
@@ -27,7 +27,7 @@ SkyColor.prototype.set = function(minute, color) {
   });
 };
 
-SkyColor.prototype.get = function(minute) {
+ColorInterpolate.prototype.get = function(minute) {
   if(minute > this.steps[this.rightBound]['time']){
     this.leftBound++;
     this.rightBound++;
@@ -38,13 +38,13 @@ SkyColor.prototype.get = function(minute) {
   return interpolate(this.steps[this.leftBound], this.steps[this.rightBound], minute);
 };
 
-SkyColor.prototype.init = function(minute){
+ColorInterpolate.prototype.init = function(minute){
   var _b = searchRange(0, this.steps.length-1, this.steps, minute);
   this.leftBound = _b[0];
   this.rightBound = _b[1];
 }
 
-SkyColor.prototype.startDay = function(){
+ColorInterpolate.prototype.startDay = function(){
   this.leftBound = 0;
   this.rightBound = 1;
 }
@@ -126,4 +126,4 @@ function searchRange(_start, _end, arr, target){
 
 }
 
-module.exports = new SkyColor();
+module.exports = ColorInterpolate;
