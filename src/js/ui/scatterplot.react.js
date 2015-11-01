@@ -86,8 +86,9 @@ var ScatterplotOverlayExample = React.createClass({
         dots: this.props.dots,
         globalOpacity: 1,
         compositeOperation: 'screen',
+        bgColor: this.props.bgColor,
         zoom: this.state.zoom,
-        bgColor: this.props.bgColor
+        defaultZoom: 12
       })
     ]);
   }

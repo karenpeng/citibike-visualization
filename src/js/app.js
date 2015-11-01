@@ -12,7 +12,7 @@ var Immutable = require('immutable');
 var requestAnimationFrame = require('./util/requestAnimationFrame');
 var getAccessToken = require('./util/token');
 var token = require('./../../processed_data/token.json').token[1];
-var SkyColor = require('./util/skyColor');
+var mySkyColor = require('./util/skyColor');
 
 var ScatterplotExample = require('./ui/scatterplot.react');
 var Clock = require('./ui/clock');
@@ -34,7 +34,6 @@ var stationURL = 'http://karenpeng.github.io/citibike-visualization/processed_da
 var recordURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/records.json';
 
 var scale = d3.scale.sqrt().range([0, 30]).domain([0, 60]);
-var mySkyColor = new SkyColor();
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
@@ -64,7 +63,8 @@ var App = React.createClass({
       isDay: false,
       done: false,
       //total: 0
-      skyColor: 'rgba(0, 0, 0, 0.4)'
+      skyColor: 'rgba(0, 0, 0, 0.6)',
+      dotColor: '#00A6E6'
     };
   },
 
@@ -110,18 +110,12 @@ var App = React.createClass({
           hour: h,
           minute: m,
           second: fakeTime.seconds(),
-          isDay: (h < 18 && h >= 6),
+          isDay: (h < 18 && h > 6),
           skyColor: mySkyColor.get(h * 60 + m)
         });
       });
     });
 
-  },
-
-  componentWillUpdate: function(nextProps, nextState){
-    if(nextState.date !== this.state.date){
-      mySkyColor.startDay();
-    }
   },
 
   handleResize: function(){
@@ -130,7 +124,6 @@ var App = React.createClass({
       height: window.innerHeight
     });
   },
-
 
   handleClick: function(){
 
@@ -170,19 +163,26 @@ var App = React.createClass({
 
   animate: function(){
 
-    var d = fakeTime.date();
-    var h = fakeTime.hours();
-    var m = fakeTime.minutes();
+    var _d = fakeTime.date();
+    var _h = fakeTime.hours();
+    var _m = fakeTime.minutes();
+
+    var _minutes = _h * 60 + _m;
+
+    if( _minutes === 0){
+      mySkyColor.startDay();
+    }
 
     this.setState({
       month: fakeTime.month(),
-      date: d,
-      hour: h,
-      minute: m,
+      date: _d,
+      hour: _h,
+      minute: _m,
       second: fakeTime.seconds(),
-      isDay: (h < 18 && h >= 6),
-      skyColor: mySkyColor.get(h * 60 + m)
+      isDay: (_h < 18 && _h > 6),
+      skyColor: mySkyColor.get(_minutes)
     })
+    console.log(mySkyColor.leftBound, mySkyColor.rightBound, mySkyColor.get(_minutes))
 
     var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
 
@@ -196,7 +196,7 @@ var App = React.createClass({
 
       index ++;
       
-      if(index >= size - 1 || d === 4){
+      if(index >= size - 1 || _d === 4){
         console.log('STOP!')
         this.setState({
           done: true
@@ -225,7 +225,8 @@ var App = React.createClass({
         mapboxApiAccessToken: token,
         dots: this.state.dots,
         //mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8',
-        bgColor: this.state.skyColor
+        bgColor: this.state.skyColor,
+        dotFill: this.state.dotColor
       })),
 
       r(Clock, assign({

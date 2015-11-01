@@ -1,23 +1,26 @@
 'use strict';
 
-var d3 = require('d3');
-
 function SkyColor(){
   this.steps = [
-    {'time': 0, 'color': [0, 0, 0, 0.6]},
-    {'time': 320, 'color': [240, 146, 122, 0.1]},
-    {'time': 350, 'color': [86, 236, 240, 0.3]},
-    {'time': 360, 'color': [255, 255, 255, 0]},
-    {'time': 1080, 'color': [90, 150, 250, 0.2]},
-    {'time': 1140, 'color': [33, 89, 210, 0.1]},
-    {'time': 1200, 'color': [0, 0, 0, 0.2]},
-    {'time': 1440, 'color': [0, 0, 0, 0.6]},
+    {'time': 0, 'color': [0, 0, 0, 0.7]},
+    {'time': 360, 'color': [0, 0, 0, 0.5]},
+    {'time': 420, 'color': [0, 0, 0, 0]},
+    {'time': 960, 'color': [0, 0, 0, 0]},
+    {'time': 1020, 'color': [0, 0, 0, 0.5]},
+    {'time': 1440, 'color': [0, 0, 0, 0.7]},
   ];
   this.leftBound = 0;
   this.rightBound = 1;
 }
 
 SkyColor.prototype.set = function(minute, color) {
+  for(var i = 0; i < this.steps.length; i++){
+    var _obj = this.steps[i];
+    if(_obj['time'] === minute){
+      _obj['color'] = color;
+      return;
+    }
+  }
   this.steps.push({'time': minute, 'color': color});
   this.steps.sort(function(a, b){
     return a['time'] - b['time'];
@@ -28,6 +31,9 @@ SkyColor.prototype.get = function(minute) {
   if(minute > this.steps[this.rightBound]['time']){
     this.leftBound++;
     this.rightBound++;
+  }
+  if(this.leftBound === this.rightBound){
+    return 'rgba('+this.steps[this.leftBound]['color'].join(',') + ')';
   }
   return interpolate(this.steps[this.leftBound], this.steps[this.rightBound], minute);
 };
@@ -44,7 +50,7 @@ SkyColor.prototype.startDay = function(){
 }
 
 function interpolate(l, r, target){
-  var amt = (r['time'] - target)/(r['time'] - l['time']);
+  var amt = (target - l['time'])/(r['time'] - l['time']);
 
   var _r = lerp(l['color'][0], r['color'][0], amt).toFixed();
   var _g = lerp(l['color'][1], r['color'][1], amt).toFixed();
@@ -54,11 +60,30 @@ function interpolate(l, r, target){
 };
 
 function lerp(start, stop, amt) {
-  return amt*(stop-start)+start;
+  return start + amt * (stop - start);
 };
 
 function searchRange(_start, _end, arr, target){
   var leftBound, rightBound;
+
+  // for(var i = 0; i < arr.length; i++){
+  //   if(arr[i]['time'] === target) return [i, i]
+  //   if(arr[i]['time'] > target){
+  //     rightBound = i;
+  //     break;
+  //   }
+  // }
+
+  // for(var i = arr.length-1; i >= 0; i--){
+  //   if(arr[i]['time'] === target) return [i, i]
+  //   if(arr[i]['time'] < target){
+  //     leftBound = i;
+  //     break;
+  //   }
+  // }
+  // return [leftBound, rightBound];
+
+  //use binary search instead
   var start = _start;
   var end = _end;
 
@@ -98,6 +123,7 @@ function searchRange(_start, _end, arr, target){
   else rightBound = end + 1; 
 
   return [leftBound, rightBound];
+
 }
 
-module.exports = SkyColor;
+module.exports = new SkyColor();

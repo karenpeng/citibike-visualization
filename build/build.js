@@ -690,6 +690,7 @@ var MapGL = React.createClass({
       return;
     }
 
+    //make changes for batch after diffing
     map.batch(function batchStyleUpdates() {
       sourcesDiff.enter.forEach(function each(enter) {
         map.addSource(enter.id, enter.source.toJS());
@@ -1009,6 +1010,7 @@ var ScatterplotOverlay = React.createClass({
     dotFill: React.PropTypes.string,
     compositeOperation: React.PropTypes.oneOf(COMPOSITE_TYPES),
     dots: React.PropTypes.object,
+    defaultZoom: React.PropTypes.number,
     zoom: React.PropTypes.number,
     bgColor: React.PropTypes.string
   },
@@ -1050,18 +1052,26 @@ var ScatterplotOverlay = React.createClass({
     ctx.scale(pixelRatio, pixelRatio);
     ctx.clearRect(0, 0, props.width, props.height);
     //ctx.globalCompositeOperation = this.props.compositeOperation;
-    
+    ctx.save();
     ctx.fillStyle = this.props.bgColor;
     ctx.fillRect(0, 0, props.width, props.height);
     ctx.fill();
+    ctx.restore();
+
+    var scalar = Math.pow(this.props.zoom / this.props.defaultZoom, 6);
 
     if ((this.props.renderWhileDragging || !this.props.isDragging) &&
       this.props.dots // this.props.locations
     ) {
+      ctx.save();
       for(var key in this.props.dots) {
         var dot = this.props.dots[key];
         var latLng = this.props.latLngAccessor(dot);
         var radius = this.props.radiusAccessor(dot);
+
+        //keep pace with the map's zooming
+        radius *= scalar;
+
         var pixel = this.props.project(latLng);
         var pixelRounded = [d3.round(pixel.x, 1), d3.round(pixel.y, 1)];
         if (pixelRounded[0] + radius >= 0 &&
@@ -1080,8 +1090,8 @@ var ScatterplotOverlay = React.createClass({
           ctx.arc(pixelRounded[0], pixelRounded[1], radius, 0, Math.PI * 2);
           ctx.fill();
         }
-        
       }
+      ctx.restore();
     }
     ctx.restore();
   },
@@ -67503,7 +67513,7 @@ var Immutable = require('immutable');
 var requestAnimationFrame = require('./util/requestAnimationFrame');
 var getAccessToken = require('./util/token');
 var token = require('./../../processed_data/token.json').token[1];
-var SkyColor = require('./util/skyColor');
+var mySkyColor = require('./util/skyColor');
 
 var ScatterplotExample = require('./ui/scatterplot.react');
 var Clock = require('./ui/clock');
@@ -67525,7 +67535,6 @@ var stationURL = 'http://karenpeng.github.io/citibike-visualization/processed_da
 var recordURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/records.json';
 
 var scale = d3.scale.sqrt().range([0, 30]).domain([0, 60]);
-var mySkyColor = new SkyColor();
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
@@ -67555,7 +67564,8 @@ var App = React.createClass({
       isDay: false,
       done: false,
       //total: 0
-      skyColor: 'rgba(0, 0, 0, 0.4)'
+      skyColor: 'rgba(0, 0, 0, 0.6)',
+      dotColor: '#00A6E6'
     };
   },
 
@@ -67601,18 +67611,12 @@ var App = React.createClass({
           hour: h,
           minute: m,
           second: fakeTime.seconds(),
-          isDay: (h < 18 && h >= 6),
+          isDay: (h < 18 && h > 6),
           skyColor: mySkyColor.get(h * 60 + m)
         });
       });
     });
 
-  },
-
-  componentWillUpdate: function(nextProps, nextState){
-    if(nextState.date !== this.state.date){
-      mySkyColor.startDay();
-    }
   },
 
   handleResize: function(){
@@ -67621,7 +67625,6 @@ var App = React.createClass({
       height: window.innerHeight
     });
   },
-
 
   handleClick: function(){
 
@@ -67661,19 +67664,26 @@ var App = React.createClass({
 
   animate: function(){
 
-    var d = fakeTime.date();
-    var h = fakeTime.hours();
-    var m = fakeTime.minutes();
+    var _d = fakeTime.date();
+    var _h = fakeTime.hours();
+    var _m = fakeTime.minutes();
+
+    var _minutes = _h * 60 + _m;
+
+    if( _minutes === 0){
+      mySkyColor.startDay();
+    }
 
     this.setState({
       month: fakeTime.month(),
-      date: d,
-      hour: h,
-      minute: m,
+      date: _d,
+      hour: _h,
+      minute: _m,
       second: fakeTime.seconds(),
-      isDay: (h < 18 && h >= 6),
-      skyColor: mySkyColor.get(h * 60 + m)
+      isDay: (_h < 18 && _h > 6),
+      skyColor: mySkyColor.get(_minutes)
     })
+    console.log(mySkyColor.leftBound, mySkyColor.rightBound, mySkyColor.get(_minutes))
 
     var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
 
@@ -67687,7 +67697,7 @@ var App = React.createClass({
 
       index ++;
       
-      if(index >= size - 1 || d === 4){
+      if(index >= size - 1 || _d === 4){
         console.log('STOP!')
         this.setState({
           done: true
@@ -67716,7 +67726,8 @@ var App = React.createClass({
         mapboxApiAccessToken: token,
         dots: this.state.dots,
         //mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8',
-        bgColor: this.state.skyColor
+        bgColor: this.state.skyColor,
+        dotFill: this.state.dotColor
       })),
 
       r(Clock, assign({
@@ -68002,8 +68013,9 @@ var ScatterplotOverlayExample = React.createClass({
         dots: this.props.dots,
         globalOpacity: 1,
         compositeOperation: 'screen',
+        bgColor: this.props.bgColor,
         zoom: this.state.zoom,
-        bgColor: this.props.bgColor
+        defaultZoom: 12
       })
     ]);
   }
@@ -68051,24 +68063,27 @@ module.exports = requestAnimationFrame;
 },{}],370:[function(require,module,exports){
 'use strict';
 
-var d3 = require('d3');
-
 function SkyColor(){
   this.steps = [
-    {'time': 0, 'color': [0, 0, 0, 0.6]},
-    {'time': 320, 'color': [240, 146, 122, 0.1]},
-    {'time': 350, 'color': [86, 236, 240, 0.3]},
-    {'time': 360, 'color': [255, 255, 255, 0]},
-    {'time': 1080, 'color': [90, 150, 250, 0.2]},
-    {'time': 1140, 'color': [33, 89, 210, 0.1]},
-    {'time': 1200, 'color': [0, 0, 0, 0.2]},
-    {'time': 1440, 'color': [0, 0, 0, 0.6]},
+    {'time': 0, 'color': [0, 0, 0, 0.7]},
+    {'time': 360, 'color': [0, 0, 0, 0.5]},
+    {'time': 420, 'color': [0, 0, 0, 0]},
+    {'time': 960, 'color': [0, 0, 0, 0]},
+    {'time': 1020, 'color': [0, 0, 0, 0.5]},
+    {'time': 1440, 'color': [0, 0, 0, 0.7]},
   ];
   this.leftBound = 0;
   this.rightBound = 1;
 }
 
 SkyColor.prototype.set = function(minute, color) {
+  for(var i = 0; i < this.steps.length; i++){
+    var _obj = this.steps[i];
+    if(_obj['time'] === minute){
+      _obj['color'] = color;
+      return;
+    }
+  }
   this.steps.push({'time': minute, 'color': color});
   this.steps.sort(function(a, b){
     return a['time'] - b['time'];
@@ -68079,6 +68094,9 @@ SkyColor.prototype.get = function(minute) {
   if(minute > this.steps[this.rightBound]['time']){
     this.leftBound++;
     this.rightBound++;
+  }
+  if(this.leftBound === this.rightBound){
+    return 'rgba('+this.steps[this.leftBound]['color'].join(',') + ')';
   }
   return interpolate(this.steps[this.leftBound], this.steps[this.rightBound], minute);
 };
@@ -68095,7 +68113,7 @@ SkyColor.prototype.startDay = function(){
 }
 
 function interpolate(l, r, target){
-  var amt = (r['time'] - target)/(r['time'] - l['time']);
+  var amt = (target - l['time'])/(r['time'] - l['time']);
 
   var _r = lerp(l['color'][0], r['color'][0], amt).toFixed();
   var _g = lerp(l['color'][1], r['color'][1], amt).toFixed();
@@ -68105,11 +68123,30 @@ function interpolate(l, r, target){
 };
 
 function lerp(start, stop, amt) {
-  return amt*(stop-start)+start;
+  return start + amt * (stop - start);
 };
 
 function searchRange(_start, _end, arr, target){
   var leftBound, rightBound;
+
+  // for(var i = 0; i < arr.length; i++){
+  //   if(arr[i]['time'] === target) return [i, i]
+  //   if(arr[i]['time'] > target){
+  //     rightBound = i;
+  //     break;
+  //   }
+  // }
+
+  // for(var i = arr.length-1; i >= 0; i--){
+  //   if(arr[i]['time'] === target) return [i, i]
+  //   if(arr[i]['time'] < target){
+  //     leftBound = i;
+  //     break;
+  //   }
+  // }
+  // return [leftBound, rightBound];
+
+  //use binary search instead
   var start = _start;
   var end = _end;
 
@@ -68149,10 +68186,12 @@ function searchRange(_start, _end, arr, target){
   else rightBound = end + 1; 
 
   return [leftBound, rightBound];
+
 }
 
-module.exports = SkyColor;
-},{"d3":18}],371:[function(require,module,exports){
+module.exports = new SkyColor();
+
+},{}],371:[function(require,module,exports){
 'use strict';
 
 var window = require('global/window');
