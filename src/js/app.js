@@ -111,7 +111,7 @@ var App = React.createClass({
 
         var _h = fakeTime.hours();
         var _m = fakeTime.minutes();
-        var _minutes = _h + _m;
+        var _minutes = _h * 60 + _m;
         mySkyColor.init(_minutes);
         myDotColor.init(_minutes);
 
