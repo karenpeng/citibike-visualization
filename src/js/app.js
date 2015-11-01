@@ -11,7 +11,7 @@ var Immutable = require('immutable');
 
 var requestAnimationFrame = require('./util/requestAnimationFrame');
 var getAccessToken = require('./util/token');
-var token = require('./../../processed_data/token.json').token[1];
+var token = require('./../../processed_data/token.json').token[0];
 var ColorInterpolate = require('./util/colorInterpolate');
 var mySkyColor = new ColorInterpolate();
 var myDotColor = new ColorInterpolate();
@@ -19,9 +19,9 @@ var myDotColor = new ColorInterpolate();
 myDotColor.set(0, [160, 222, 255, 1]);
 myDotColor.set(1440, [160, 222, 255, 1]);
 myDotColor.set(360, [112, 189, 245, 1]);
-myDotColor.set(1020, [112, 189, 245, 1]);
-myDotColor.set(420, [73, 124, 187, 1]);
-myDotColor.set(960, [73, 124, 187, 1]);
+myDotColor.set(1080, [112, 189, 245, 1]);
+myDotColor.set(420, [96, 168, 232, 1]);
+myDotColor.set(1020, [96, 168, 232, 1]);
 
 
 var ScatterplotExample = require('./ui/scatterplot.react');
@@ -108,22 +108,23 @@ var App = React.createClass({
         size = timeData.size;
         //console.dir(timeData);
 
-        var h = fakeTime.hours();
-        var m = fakeTime.minutes();
-        mySkyColor.init(h * 60 + m);
-        myDotColor.init(h * 60 + m);
+        var _h = fakeTime.hours();
+        var _m = fakeTime.minutes();
+        var _minutes = _h + _m;
+        mySkyColor.init(_minutes);
+        myDotColor.init(_minutes);
 
         that.setState({ 
           dots: stationData,
           loaded: true,
           month: fakeTime.month(),
           date: fakeTime.date(),
-          hour: h,
-          minute: m,
+          hour: _h,
+          minute: _m,
           second: fakeTime.seconds(),
-          isDay: (h < 18 && h > 6),
-          skyColor: mySkyColor.get(h * 60 + m),
-          dotColor: myDotColor.get(h * 60 + m)
+          isDay: (_h <= 17 && _h >= 7),
+          skyColor: mySkyColor.get(_minutes),
+          dotColor: myDotColor.get(_minutes)
         });
       });
     });
@@ -181,7 +182,7 @@ var App = React.createClass({
 
     var _minutes = _h * 60 + _m;
 
-    if( _minutes === 0){
+    if(_minutes === 0){
       mySkyColor.startDay();
       myDotColor.startDay();
     }
@@ -192,7 +193,7 @@ var App = React.createClass({
       hour: _h,
       minute: _m,
       second: fakeTime.seconds(),
-      isDay: (_h < 18 && _h > 6),
+      isDay: (_h <= 17 && _h >= 7),
       skyColor: mySkyColor.get(_minutes),
       dotColor: myDotColor.get(_minutes)
     })

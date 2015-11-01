@@ -5,8 +5,8 @@ function ColorInterpolate(){
     {'time': 0, 'color': [0, 0, 0, 0.7]},
     {'time': 360, 'color': [0, 0, 0, 0.5]},
     {'time': 420, 'color': [0, 0, 0, 0]},
-    {'time': 960, 'color': [0, 0, 0, 0]},
-    {'time': 1020, 'color': [0, 0, 0, 0.5]},
+    {'time': 1020, 'color': [0, 0, 0, 0]},
+    {'time': 1080, 'color': [0, 0, 0, 0.5]},
     {'time': 1440, 'color': [0, 0, 0, 0.7]},
   ];
   this.leftBound = 0;
