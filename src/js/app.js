@@ -3,6 +3,7 @@
 var document = require('global/document');
 var window = require('global/window');
 var React = require('react');
+var ReactDOM = require('react-dom');
 var r = require('r-dom');
 var assign = require('object-assign');
 var d3 = require('d3');
@@ -274,4 +275,4 @@ var App = React.createClass({
 
 })
 
-React.render(r(App), document.getElementById('chart'));
+ReactDOM.render(r(App), document.getElementById('chart'));
