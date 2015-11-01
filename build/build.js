@@ -693,7 +693,6 @@ var MapGL = React.createClass({
       return;
     }
 
-    //make changes for batch after diffing
     map.batch(function batchStyleUpdates() {
       sourcesDiff.enter.forEach(function each(enter) {
         map.addSource(enter.id, enter.source.toJS());
@@ -941,7 +940,6 @@ MapGL.fitBounds = function fitBounds(width, height, _bounds, options) {
 };
 
 module.exports = MapGL;
-
 },{"./config":1,"./map-interactions.react":3,"./noop":5,"assert":7,"d3":17,"debounce":19,"gl-matrix":63,"immutable":76,"mapbox-gl":108,"mapbox-gl/js/geo/transform":106,"object-assign":192,"r-dom":196,"react":358,"react-dom":229}],5:[function(require,module,exports){
 // Copyright (c) 2015 Uber Technologies, Inc.
 
