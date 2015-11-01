@@ -33,7 +33,7 @@ var location = require('./../../../processed_data/cities.json')[0];
 
 var ScatterplotOverlayExample = React.createClass({
 
-  displayName: 'ScatterplotOverlayExample',
+  displayName: 'ScatterplotOverlay',
 
   PropTypes: {
     width: React.PropTypes.number.isRequired,

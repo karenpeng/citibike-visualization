@@ -7,10 +7,12 @@ var r = require('r-dom');
 var assign = require('object-assign');
 var d3 = require('d3');
 var moment = require('moment');
-//var SkyColor = require('sky-color-generator');
+var Immutable = require('immutable');
+
 var requestAnimationFrame = require('./util/requestAnimationFrame');
 var getAccessToken = require('./util/token');
 var token = require('./../../processed_data/token.json').token[1];
+var SkyColor = require('./util/skyColor');
 
 var ScatterplotExample = require('./ui/scatterplot.react');
 var Clock = require('./ui/clock');
@@ -26,13 +28,13 @@ var fakeTime = moment("2015-09-01T00:00:00.000Z").subtract(rate, 'millisecond');
 var size;
 var timeData;
 var stationData = {};
-var total = 0;
+//var total = 0;
 
 var stationURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/stations.json';
 var recordURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/records.json';
 
 var scale = d3.scale.sqrt().range([0, 30]).domain([0, 60]);
-//var skyColor = new SkyColor();
+var mySkyColor = new SkyColor();
 
 //@TODO: figure out how to do requestAnimationFrame properly in react
 function tick(cb){
@@ -46,7 +48,7 @@ var App = React.createClass({
 
   displayName: 'App',
 
-  getInitialState: function getInitialState(){
+  getInitialState: function(){
     return{
       dots: {},
       width: window.innerWidth,
@@ -61,15 +63,9 @@ var App = React.createClass({
       second: 0,
       isDay: false,
       done: false,
-      total: 0
+      //total: 0
+      skyColor: 'rgba(0, 0, 0, 0.4)'
     };
-  },
-
-  handleResize: function(){
-    this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
   },
 
   componentDidMount: function(){
@@ -98,10 +94,13 @@ var App = React.createClass({
           return;
         }
         
-        timeData = data['records'];
+        timeData = Immutable.fromJS(data['records']);
+        size = timeData.size;
         //console.dir(timeData);
 
         var h = fakeTime.hours();
+        var m = fakeTime.minutes();
+        mySkyColor.init(h * 60 + m);
 
         that.setState({ 
           dots: stationData,
@@ -109,68 +108,27 @@ var App = React.createClass({
           month: fakeTime.month(),
           date: fakeTime.date(),
           hour: h,
-          minute: fakeTime.minutes(),
+          minute: m,
           second: fakeTime.seconds(),
-          isDay: (h < 18 && h >= 6)
+          isDay: (h < 18 && h >= 6),
+          skyColor: mySkyColor.get(h * 60 + m)
         });
       });
-
     });
 
   },
 
-  _increaseDot: function(key){
-    stationData[key]['count'] ++;
-    stationData[key]['radius'] = d3.round(scale(stationData[key]['count']), 1);
-  },
-
-  _decreaseDot: function(key){
-    stationData[key]['count'] --;
-    //something wrong with the data
-    stationData[key]['count'] = stationData[key]['count'] < 0 ? 0 : stationData[key]['count'];
-    stationData[key]['radius'] = d3.round(scale(stationData[key]['count']), 1);
-  },
-
-  animate: function(){
-
-    var d = fakeTime.date();
-    var h = fakeTime.hours();
-
-    this.setState({
-      month: fakeTime.month(),
-      date: d,
-      hour: h,
-      minute: fakeTime.minutes(),
-      second: fakeTime.seconds(),
-      isDay: (h < 18 && h >= 6)//,
-      //skyColor: skyColor(h)
-    })
-
-    var gap = moment(timeData[index]['time']).diff(fakeTime);
-
-    while(gap <= 0){
-
-      if(timeData[index]['prop'] === 'start'){
-        this._decreaseDot(timeData[index]['id']);
-      }else{
-        this._increaseDot(timeData[index]['id']);
-      }
-
-      index ++;
-      
-      if(index >= size - 1 || d === 4){
-        console.log('STOP!')
-        this.setState({
-          done: true
-        })
-        window.cancelAnimationFrame(animationID);
-        return;
-      }
-
-      gap = moment(timeData[index]['time']).diff(fakeTime);
+  componentWillUpdate: function(nextProps, nextState){
+    if(nextState.date !== this.state.date){
+      mySkyColor.startDay();
     }
+  },
 
-    fakeTime.add(rate, 'millisecond');
+  handleResize: function(){
+    this.setState({
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
   },
 
 
@@ -198,6 +156,61 @@ var App = React.createClass({
     rate = 20000 + value * 2000;
   },
 
+  _increaseDot: function(key){
+    stationData[key]['count'] ++;
+    stationData[key]['radius'] = d3.round(scale(stationData[key]['count']), 1);
+  },
+
+  _decreaseDot: function(key){
+    stationData[key]['count'] --;
+    //something wrong with the data
+    stationData[key]['count'] = stationData[key]['count'] < 0 ? 0 : stationData[key]['count'];
+    stationData[key]['radius'] = d3.round(scale(stationData[key]['count']), 1);
+  },
+
+  animate: function(){
+
+    var d = fakeTime.date();
+    var h = fakeTime.hours();
+    var m = fakeTime.minutes();
+
+    this.setState({
+      month: fakeTime.month(),
+      date: d,
+      hour: h,
+      minute: m,
+      second: fakeTime.seconds(),
+      isDay: (h < 18 && h >= 6),
+      skyColor: mySkyColor.get(h * 60 + m)
+    })
+
+    var gap = moment(timeData.get(index).get('time')).diff(fakeTime);
+
+    while(gap <= 0){
+
+      if(timeData.get(index).get('prop') === 'start'){
+        this._decreaseDot(timeData.get(index).get('id'));
+      }else{
+        this._increaseDot(timeData.get(index).get('id'));
+      }
+
+      index ++;
+      
+      if(index >= size - 1 || d === 4){
+        console.log('STOP!')
+        this.setState({
+          done: true
+        })
+        window.cancelAnimationFrame(animationID);
+        return;
+      }
+
+      gap = moment(timeData.get(index).get('time')).diff(fakeTime);
+    }
+
+    fakeTime.add(rate, 'millisecond');
+  },
+
   render: function(){
 
     var buttonClass = this.state.ticking ? 'pause' : 'start';
@@ -211,8 +224,8 @@ var App = React.createClass({
         //mapboxApiAccessToken: getAccessToken(),
         mapboxApiAccessToken: token,
         dots: this.state.dots,
-        mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8',
-        bgColor: 'rgba(0, 100, 200, 0)'
+        //mapStyle: this.state.isDay ? 'mapbox://styles/mapbox/light-v8' : 'mapbox://styles/mapbox/dark-v8',
+        bgColor: this.state.skyColor
       })),
 
       r(Clock, assign({

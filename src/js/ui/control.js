@@ -7,6 +7,8 @@ var assign = require('object-assign');
 
 var ControlPanel = React.createClass({
 
+  displayName: 'Control',
+  
   propTypes:{
     handleClick: React.PropTypes.func,
     handleSlide: React.PropTypes.func,

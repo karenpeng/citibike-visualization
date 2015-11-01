@@ -7,6 +7,8 @@ var assign = require('object-assign');
 
 var Info = React.createClass({
 
+  displayName: 'Header',
+
   render: function(){
     return r.div({
         className: 'info'

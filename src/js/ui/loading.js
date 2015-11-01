@@ -6,6 +6,9 @@ var r = require('r-dom');
 var assign = require('object-assign');
 
 var Loading = React.createClass({
+
+  displayName: 'Loading',
+
   PropTypes:{
     loadingClassName: React.PropTypes.string
   },
