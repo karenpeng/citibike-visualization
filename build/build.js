@@ -1477,7 +1477,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":362}],8:[function(require,module,exports){
+},{"util/":363}],8:[function(require,module,exports){
 /*!
   * Bowser - a browser detector
   * https://github.com/ded/bowser
@@ -25586,7 +25586,7 @@ function unbundle(_) {
     }
 }
 
-},{"csscolorparser":16,"util":362}],81:[function(require,module,exports){
+},{"csscolorparser":16,"util":363}],81:[function(require,module,exports){
 module.exports = require('./v8.json');
 
 },{"./v8.json":83}],82:[function(require,module,exports){
@@ -27779,7 +27779,7 @@ function pointContainsPoint(rings, p, radius) {
     return false;
 }
 
-},{"../util/util":190,"point-geometry":195,"rbush":197,"vector-tile":363}],100:[function(require,module,exports){
+},{"../util/util":190,"point-geometry":195,"rbush":197,"vector-tile":364}],100:[function(require,module,exports){
 'use strict';
 
 var ElementGroups = require('./element_groups');
@@ -31426,7 +31426,7 @@ FeatureWrapper.prototype.bbox = function() {
 
 FeatureWrapper.prototype.toGeoJSON = VectorTileFeature.prototype.toGeoJSON;
 
-},{"point-geometry":195,"vector-tile":363}],125:[function(require,module,exports){
+},{"point-geometry":195,"vector-tile":364}],125:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -33023,7 +33023,7 @@ util.extend(Worker.prototype, {
     }
 });
 
-},{"../util/actor":177,"../util/ajax":178,"../util/util":190,"./geojson_wrapper":124,"./worker_tile":134,"geojson-vt":58,"pbf":194,"vector-tile":363}],134:[function(require,module,exports){
+},{"../util/actor":177,"../util/ajax":178,"../util/util":190,"./geojson_wrapper":124,"./worker_tile":134,"geojson-vt":58,"pbf":194,"vector-tile":364}],134:[function(require,module,exports){
 'use strict';
 
 var FeatureTree = require('../data/feature_tree');
@@ -39816,7 +39816,7 @@ Dispatcher.prototype = {
     }
 };
 
-},{"../../source/worker":133,"../actor":177,"webworkify":367}],182:[function(require,module,exports){
+},{"../../source/worker":133,"../actor":177,"webworkify":368}],182:[function(require,module,exports){
 'use strict';
 
 var Point = require('point-geometry');
@@ -40664,7 +40664,7 @@ exports.getCoordinatesCenter = function(coords) {
         .zoomTo(Math.floor(-Math.log(dMax) / Math.LN2));
 };
 
-},{"../geo/coordinate":103,"unitbezier":360}],191:[function(require,module,exports){
+},{"../geo/coordinate":103,"unitbezier":361}],191:[function(require,module,exports){
 //! moment.js
 //! version : 2.10.6
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -66070,6 +66070,204 @@ void (function(root, factory) {
 }));
 
 },{}],360:[function(require,module,exports){
+'use strict'
+
+var moment = require('moment')
+
+function SkyColor(){
+  this.steps = [
+    {'time': 0, 'color': [0, 0, 0, 0.7]},
+    {'time': 360, 'color': [0, 0, 0, 0.5]},
+    {'time': 420, 'color': [0, 0, 0, 0]},
+    {'time': 1020, 'color': [0, 0, 0, 0]},
+    {'time': 1080, 'color': [0, 0, 0, 0.5]},
+    {'time': 1440, 'color': [0, 0, 0, 0.7]},
+  ];
+  this.leftBound = 0;
+  this.rightBound = 1;
+}
+
+/**
+ * Set color for certain point of time
+ * @param {Number | String} time  how many minutes in a day or a ISO 8601 format time
+ * @param {[Array]} color  An array of r, g, b, a color value
+ */
+SkyColor.prototype.set = function(time, color){
+  var minutes, c
+
+  if(typeof time === 'number' && time >= 0 && time <= 1440){
+    minutes = time
+  }
+
+  else if(typeof time === 'string'){
+    try{
+      minutes = moment(time).getHours() * 60 + moment(time).getMinutes()
+    }catch(e){
+      throw new Error('sky-color-generator: invalid time')
+      return
+    }
+   
+  }else{
+    throw new Error('sky-color-generator: invalid time')
+    return
+  }
+
+  if(Array.isArray(color)){
+    c = color
+  }else{
+    throw new Error('sky-color-generator: sorry color only supports rgba array now :(')
+    return
+  }
+
+  for(var i = 0; i < this.steps.length; i++){
+    var _obj = this.steps[i];
+    if(_obj['time'] === minutes){
+      _obj['color'] = c;
+      return;
+    }
+  }
+
+  this.steps.push({'time': minutes, 'color': c})
+  this.steps.sort(function(a, b){
+    return a['time'] - b['time'];
+  });
+} 
+
+/**
+ * Get color with a given time
+ * @param {Number | String} time  how many minutes in a day or a ISO 8601 format time
+ * @return {[Array]} color  An array of r, g, b, a color value
+ */
+SkyColor.prototype.get = function(time){
+
+  var minutes;
+
+  if(typeof time === 'number' && time >= 0 && time <= 1440){
+    minutes = time
+  }
+
+  else if(typeof time === 'string'){
+    try{
+      minutes = moment(time).getHours() * 60 + moment(time).getMinutes()
+    }catch(e){
+      throw new Error('sky-color-generator: invalid time')
+      return
+    }
+   
+  }else{
+    throw new Error('sky-color-generator: invalid time')
+    return
+  }
+
+  if(minutes > this.steps[this.rightBound]['time']){
+    this.leftBound++;
+    this.rightBound++;
+  }
+  if(this.leftBound === this.rightBound){
+    return 'rgba('+this.steps[this.leftBound]['color'].join(',') + ')';
+  }
+  return interpolate(this.steps[this.leftBound], this.steps[this.rightBound], minutes);
+
+}
+
+/**
+ * Initianize the color generator with a given time
+ * @param  {Number | String} time  how many minutes in a day or a ISO 8601 format time
+ */
+SkyColor.prototype.init = function(minute){
+  var _b = searchRange(0, this.steps.length-1, this.steps, minute);
+  this.leftBound = _b[0];
+  this.rightBound = _b[1];
+}
+
+/**
+ * Reset color generator when a new day comes
+ */
+SkyColor.prototype.startDay = function(){
+  this.leftBound = 0;
+  this.rightBound = 1;
+}
+
+
+
+function interpolate(l, r, target){
+  var amt = (target - l['time'])/(r['time'] - l['time']);
+
+  var _r = lerp(l['color'][0], r['color'][0], amt).toFixed();
+  var _g = lerp(l['color'][1], r['color'][1], amt).toFixed();
+  var _b = lerp(l['color'][2], r['color'][2], amt).toFixed();
+  var _a = lerp(l['color'][3], r['color'][3], amt).toFixed(4);
+  return 'rgba(' + _r + ',' + _g + ',' + _b + ',' + _a + ')';
+};
+
+function lerp(start, stop, amt) {
+  return start + amt * (stop - start);
+};
+
+function searchRange(_start, _end, arr, target){
+  var leftBound, rightBound;
+  var start = _start;
+  var end = _end;
+
+  // for(var i = 0; i < arr.length; i++){
+  //   if(arr[i]['time'] === target) return [i, i]
+  //   if(arr[i]['time'] > target){
+  //     rightBound = i;
+  //     break;
+  //   }
+  // }
+
+  // for(var i = arr.length-1; i >= 0; i--){
+  //   if(arr[i]['time'] === target) return [i, i]
+  //   if(arr[i]['time'] < target){
+  //     leftBound = i;
+  //     break;
+  //   }
+  // }
+  // return [leftBound, rightBound];
+
+  while(start + 1 < end){
+    var mid = Math.floor((start + end) / 2);
+    var h = arr[mid]['time'];
+
+    if(h === target) return [mid, mid];
+    else if(h < target) start = mid;
+    else end = mid - 1;
+  }
+
+  var h1 = arr[start]['time'];
+  var h2 = arr[end]['time'];
+  if(h1 === target) return [start, start];
+  else if(h2 === target) return [end, end];
+  else if(h2 < target) leftBound = end;
+  else if(h1 < target) leftBound = start;
+  else leftBound = start - 1;
+
+  start = leftBound;
+  end = _end;
+  while(start + 1 < end){
+    mid = Math.floor((start + end) / 2);
+    h = arr[mid]['time'];
+
+    if(h === target) return [mid, mid];
+    else if(h > target) end = mid;
+    else start = mid + 1;
+  }
+  var h1 = arr[start]['time'];
+  var h2 = arr[end]['time'];
+  if(h1 === target) return [start, start];
+  else if(h2 === target) return [end, end];
+  else if(h1 > target) rightBound = start;
+  else if(h2 > target) rightBound = end;
+  else rightBound = end + 1; 
+
+  return [leftBound, rightBound];
+}
+
+
+
+module.exports = SkyColor;
+},{"moment":191}],361:[function(require,module,exports){
 /*
  * Copyright (C) 2008 Apple Inc. All Rights Reserved.
  *
@@ -66176,14 +66374,14 @@ UnitBezier.prototype.solve = function(x, epsilon) {
     return this.sampleCurveY(this.solveCurveX(x, epsilon));
 };
 
-},{}],361:[function(require,module,exports){
+},{}],362:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],362:[function(require,module,exports){
+},{}],363:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -66774,12 +66972,12 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./support/isBuffer":361,"_process":10,"inherits":77}],363:[function(require,module,exports){
+},{"./support/isBuffer":362,"_process":10,"inherits":77}],364:[function(require,module,exports){
 module.exports.VectorTile = require('./lib/vectortile.js');
 module.exports.VectorTileFeature = require('./lib/vectortilefeature.js');
 module.exports.VectorTileLayer = require('./lib/vectortilelayer.js');
 
-},{"./lib/vectortile.js":364,"./lib/vectortilefeature.js":365,"./lib/vectortilelayer.js":366}],364:[function(require,module,exports){
+},{"./lib/vectortile.js":365,"./lib/vectortilefeature.js":366,"./lib/vectortilelayer.js":367}],365:[function(require,module,exports){
 'use strict';
 
 var VectorTileLayer = require('./vectortilelayer');
@@ -66798,7 +66996,7 @@ function readTile(tag, layers, pbf) {
 }
 
 
-},{"./vectortilelayer":366}],365:[function(require,module,exports){
+},{"./vectortilelayer":367}],366:[function(require,module,exports){
 'use strict';
 
 var Point = require('point-geometry');
@@ -66966,7 +67164,7 @@ VectorTileFeature.prototype.toGeoJSON = function(x, y, z) {
     };
 };
 
-},{"point-geometry":195}],366:[function(require,module,exports){
+},{"point-geometry":195}],367:[function(require,module,exports){
 'use strict';
 
 var VectorTileFeature = require('./vectortilefeature.js');
@@ -67029,7 +67227,7 @@ VectorTileLayer.prototype.feature = function(i) {
     return new VectorTileFeature(this._pbf, end, this.extent, this._keys, this._values);
 };
 
-},{"./vectortilefeature.js":365}],367:[function(require,module,exports){
+},{"./vectortilefeature.js":366}],368:[function(require,module,exports){
 var bundleFn = arguments[3];
 var sources = arguments[4];
 var cache = arguments[5];
@@ -67086,7 +67284,7 @@ module.exports = function (fn) {
     ));
 };
 
-},{}],368:[function(require,module,exports){
+},{}],369:[function(require,module,exports){
 module.exports=[
   {
     "cityName": "New York",
@@ -67104,7 +67302,7 @@ module.exports=[
     "longitude": -79.9959
   }
 ]
-},{}],369:[function(require,module,exports){
+},{}],370:[function(require,module,exports){
 module.exports={
   "token": [
     "pk.eyJ1Ijoia2FyZW5wZW5nIiwiYSI6ImNpZml0OTBhdmFrcDdyN2x4MG55aGt2bWgifQ.uXH_Er0fczh9QT_4nAmz0g",
@@ -67112,7 +67310,7 @@ module.exports={
     "pk.eyJ1IjoidGhleWNhbGxtZWthcmVuIiwiYSI6ImNpZ2JnMGlsZzBidnd2am0zMnVocHBkcmEifQ.Kai8wh5_ECFmbH8wpp02_w"
   ]
 }
-},{}],370:[function(require,module,exports){
+},{}],371:[function(require,module,exports){
 'use strict';
 
 var document = require('global/document');
@@ -67128,7 +67326,7 @@ var Immutable = require('immutable');
 var requestAnimationFrame = require('./util/requestAnimationFrame');
 var getAccessToken = require('./util/token');
 var token = require('./../../processed_data/token.json').token[0];
-var ColorInterpolate = require('./util/colorInterpolate');
+var ColorInterpolate = require('sky-color-generator');
 var mySkyColor = new ColorInterpolate();
 var myDotColor = new ColorInterpolate();
 
@@ -67392,7 +67590,7 @@ var App = React.createClass({
 
 ReactDOM.render(r(App), document.getElementById('chart'));
 
-},{"./../../processed_data/token.json":369,"./ui/clock":371,"./ui/control":372,"./ui/info":373,"./ui/loading":374,"./ui/scatterplot.react":375,"./util/colorInterpolate":376,"./util/requestAnimationFrame":377,"./util/token":378,"d3":17,"global/document":73,"global/window":74,"immutable":76,"moment":191,"object-assign":192,"r-dom":196,"rc-slider":211,"react":358,"react-dom":229}],371:[function(require,module,exports){
+},{"./../../processed_data/token.json":370,"./ui/clock":372,"./ui/control":373,"./ui/info":374,"./ui/loading":375,"./ui/scatterplot.react":376,"./util/requestAnimationFrame":377,"./util/token":378,"d3":17,"global/document":73,"global/window":74,"immutable":76,"moment":191,"object-assign":192,"r-dom":196,"rc-slider":211,"react":358,"react-dom":229,"sky-color-generator":360}],372:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -67444,7 +67642,7 @@ var Clock = React.createClass({
 })
 
 module.exports = Clock;
-},{"d3":17,"r-dom":196,"react":358}],372:[function(require,module,exports){
+},{"d3":17,"r-dom":196,"react":358}],373:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -67490,7 +67688,7 @@ var ControlPanel = React.createClass({
 });
 
 module.exports = ControlPanel;
-},{"object-assign":192,"r-dom":196,"rc-slider":211,"react":358}],373:[function(require,module,exports){
+},{"object-assign":192,"r-dom":196,"rc-slider":211,"react":358}],374:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -67525,7 +67723,7 @@ var Info = React.createClass({
 });
 
 module.exports = Info;
-},{"object-assign":192,"r-dom":196,"rc-slider":211,"react":358}],374:[function(require,module,exports){
+},{"object-assign":192,"r-dom":196,"rc-slider":211,"react":358}],375:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -67553,7 +67751,7 @@ var Loading = React.createClass({
 });
 
 module.exports = Loading;
-},{"object-assign":192,"r-dom":196,"rc-slider":211,"react":358}],375:[function(require,module,exports){
+},{"object-assign":192,"r-dom":196,"rc-slider":211,"react":358}],376:[function(require,module,exports){
 // Copyright (c) 2015 Uber Technologies, Inc.
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -67653,138 +67851,7 @@ var ScatterplotOverlayExample = React.createClass({
 
 module.exports = ScatterplotOverlayExample;
 
-},{"../../../lib/index.js":2,"../../../lib/overlays/scatterplot.react":6,"./../../../processed_data/cities.json":368,"d3":17,"immutable":76,"object-assign":192,"r-dom":196,"react":358}],376:[function(require,module,exports){
-'use strict';
-
-function ColorInterpolate(){
-  this.steps = [
-    {'time': 0, 'color': [0, 0, 0, 0.7]},
-    {'time': 360, 'color': [0, 0, 0, 0.5]},
-    {'time': 420, 'color': [0, 0, 0, 0]},
-    {'time': 1020, 'color': [0, 0, 0, 0]},
-    {'time': 1080, 'color': [0, 0, 0, 0.5]},
-    {'time': 1440, 'color': [0, 0, 0, 0.7]},
-  ];
-  this.leftBound = 0;
-  this.rightBound = 1;
-}
-
-ColorInterpolate.prototype.set = function(minute, color) {
-  for(var i = 0; i < this.steps.length; i++){
-    var _obj = this.steps[i];
-    if(_obj['time'] === minute){
-      _obj['color'] = color;
-      return;
-    }
-  }
-  this.steps.push({'time': minute, 'color': color});
-  this.steps.sort(function(a, b){
-    return a['time'] - b['time'];
-  });
-};
-
-ColorInterpolate.prototype.get = function(minute) {
-  if(minute > this.steps[this.rightBound]['time']){
-    this.leftBound++;
-    this.rightBound++;
-  }
-  if(this.leftBound === this.rightBound){
-    return 'rgba('+this.steps[this.leftBound]['color'].join(',') + ')';
-  }
-  return interpolate(this.steps[this.leftBound], this.steps[this.rightBound], minute);
-};
-
-ColorInterpolate.prototype.init = function(minute){
-  var _b = searchRange(0, this.steps.length-1, this.steps, minute);
-  this.leftBound = _b[0];
-  this.rightBound = _b[1];
-}
-
-ColorInterpolate.prototype.startDay = function(){
-  this.leftBound = 0;
-  this.rightBound = 1;
-}
-
-function interpolate(l, r, target){
-  var amt = (target - l['time'])/(r['time'] - l['time']);
-
-  var _r = lerp(l['color'][0], r['color'][0], amt).toFixed();
-  var _g = lerp(l['color'][1], r['color'][1], amt).toFixed();
-  var _b = lerp(l['color'][2], r['color'][2], amt).toFixed();
-  var _a = lerp(l['color'][3], r['color'][3], amt).toFixed(4);
-  return 'rgba(' + _r + ',' + _g + ',' + _b + ',' + _a + ')';
-};
-
-function lerp(start, stop, amt) {
-  return start + amt * (stop - start);
-};
-
-function searchRange(_start, _end, arr, target){
-  var leftBound, rightBound;
-
-  // for(var i = 0; i < arr.length; i++){
-  //   if(arr[i]['time'] === target) return [i, i]
-  //   if(arr[i]['time'] > target){
-  //     rightBound = i;
-  //     break;
-  //   }
-  // }
-
-  // for(var i = arr.length-1; i >= 0; i--){
-  //   if(arr[i]['time'] === target) return [i, i]
-  //   if(arr[i]['time'] < target){
-  //     leftBound = i;
-  //     break;
-  //   }
-  // }
-  // return [leftBound, rightBound];
-
-  //use binary search instead
-  var start = _start;
-  var end = _end;
-
-  while(start + 1 < end){
-    var mid = Math.floor((start + end) / 2);
-    var h = arr[mid]['time'];
-
-    if(h === target) return [mid, mid];
-    else if(h < target) start = mid;
-    else end = mid - 1;
-  }
-
-  var h1 = arr[start]['time'];
-  var h2 = arr[end]['time'];
-  if(h1 === target) return [start, start];
-  else if(h2 === target) return [end, end];
-  else if(h2 < target) leftBound = end;
-  else if(h1 < target) leftBound = start;
-  else leftBound = start - 1;
-
-  start = leftBound;
-  end = _end;
-  while(start + 1 < end){
-    mid = Math.floor((start + end) / 2);
-    h = arr[mid]['time'];
-
-    if(h === target) return [mid, mid];
-    else if(h > target) end = mid;
-    else start = mid + 1;
-  }
-  var h1 = arr[start]['time'];
-  var h2 = arr[end]['time'];
-  if(h1 === target) return [start, start];
-  else if(h2 === target) return [end, end];
-  else if(h1 > target) rightBound = start;
-  else if(h2 > target) rightBound = end;
-  else rightBound = end + 1; 
-
-  return [leftBound, rightBound];
-
-}
-
-module.exports = ColorInterpolate;
-
-},{}],377:[function(require,module,exports){
+},{"../../../lib/index.js":2,"../../../lib/overlays/scatterplot.react":6,"./../../../processed_data/cities.json":369,"d3":17,"immutable":76,"object-assign":192,"r-dom":196,"react":358}],377:[function(require,module,exports){
 /**
  * Copyright 2013 Facebook, Inc.
  *
@@ -67838,7 +67905,7 @@ function getAccessToken() {
 }
 
 module.exports = getAccessToken;
-},{"global/window":74}]},{},[370])
+},{"global/window":74}]},{},[371])
 
 
 //# sourceMappingURL=build.js.map

@@ -13,7 +13,7 @@ var Immutable = require('immutable');
 var requestAnimationFrame = require('./util/requestAnimationFrame');
 var getAccessToken = require('./util/token');
 var token = require('./../../processed_data/token.json').token[0];
-var ColorInterpolate = require('./util/colorInterpolate');
+var ColorInterpolate = require('sky-color-generator');
 var mySkyColor = new ColorInterpolate();
 var myDotColor = new ColorInterpolate();
 
