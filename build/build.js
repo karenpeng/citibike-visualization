@@ -67706,7 +67706,7 @@ var Info = React.createClass({
       }, [
         r.h1({
           className: 'title'
-        },'Citibike Ride Visualization'),
+        },'Citibike Trip Visualization'),
         r.div({
           className: 'subtitle'
         }, [
