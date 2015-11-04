@@ -17,12 +17,12 @@ var ColorInterpolate = require('sky-color-generator');
 var mySkyColor = new ColorInterpolate();
 var myDotColor = new ColorInterpolate();
 
-myDotColor.set(0, [160, 222, 255, 1]);
-myDotColor.set(1440, [160, 222, 255, 1]);
-myDotColor.set(360, [112, 189, 245, 1]);
-myDotColor.set(1080, [112, 189, 245, 1]);
-myDotColor.set(420, [96, 168, 232, 1]);
-myDotColor.set(1020, [96, 168, 232, 1]);
+myDotColor.set(0, [170, 222, 255, 1]);
+myDotColor.set(1440, [170, 222, 255, 1]);
+myDotColor.set(360, [132, 189, 245, 1]);
+myDotColor.set(1080, [132, 189, 245, 1]);
+myDotColor.set(420, [0, 167, 230, 1]);
+myDotColor.set(1020, [0, 167, 230, 1]);
 
 
 var ScatterplotExample = require('./ui/scatterplot.react');
