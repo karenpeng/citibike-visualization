@@ -13,7 +13,7 @@ It uses an open source React wrapper for MapboxGL-js and overlay [API](https://g
 
 data source: [citibike system data](https://www.citibikenyc.com/system-data)
 
-![day](http://i.imgur.com/ykIz8lr.png)
-![night](http://i.imgur.com/TKhaTU4.png)
+![day](http://i.imgur.com/LKyzcQE.png)
+![night](http://i.imgur.com/4t9iFye.png)
 
 wip
