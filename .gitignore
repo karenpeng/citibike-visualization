@@ -1,5 +1,11 @@
 node_modules
 npm-debug.log
 build/build.js.map
-raw_data
-!raw_data/test.csv
+raw_data/201509-citibike-tripdata.csv
+raw_data/91.0.csv
+raw_data/91.1.csv
+raw_data/92.0.csv
+raw_data/92.1.csv
+raw_data/93.0.csv
+raw_data/93.1.csv
+raw_data/_9123.csv
