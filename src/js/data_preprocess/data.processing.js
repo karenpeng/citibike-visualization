@@ -105,7 +105,7 @@ function onEnd(){
 /**
  * [parseTime description]
  * @param  {string} s "9/1/2015 00:00:00"
- * @return {string}   "2015-09-01T00:00:00-04:00"
+ * @return {string}   "2015-09-01T00:00:00-05:00"
  */
 function parseTime(s){
   var _s = s.split(' ');

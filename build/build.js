@@ -67354,10 +67354,8 @@ var timeData;
 var stationData = {};
 //var total = 0;
 
-//var stationURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/stations.json';
-//var recordURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/records.json';
-var stationURL = './../processed_data/stations.json'
-var recordURL = './../processed_data/records.json'
+var stationURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/stations.json';
+var recordURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/records.json';
 
 var scale = d3.scale.sqrt().range([0, 30]).domain([0, 60]);
 
