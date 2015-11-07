@@ -30,7 +30,7 @@
     "rc-slider": "^2.0.1",
     "react": "^0.14.0",
     "react-dom": "^0.14.1",
-    "sky-color-generator": "^0.0.2",
+    "sky-color-generator": "^0.0.3",
     "svg-transform": "0.0.1"
   },
   "devDependencies": {

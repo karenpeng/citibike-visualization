@@ -74,7 +74,6 @@ function onData(obj){
   if(!stationData.hasOwnProperty(obj['start station id'])){
     stationData[obj['start station id']] = {
       'loc': [+obj['start station latitude'], +obj['start station longitude']],
-      'radius': 0,
       'min': 0,
       'count': 0
     }
@@ -83,7 +82,6 @@ function onData(obj){
   if(!stationData.hasOwnProperty(obj['stop station id'])){
     stationData[obj['end station id']] = {
       'loc': [+obj['end station latitude'], +obj['end station longitude']],
-      'radius': 0,
       'min': 0,
       'count': 0
     }
@@ -107,12 +105,12 @@ function onEnd(){
 /**
  * [parseTime description]
  * @param  {string} s "9/1/2015 00:00:00"
- * @return {string}   "2015-09-01T00:00:00"
+ * @return {string}   "2015-09-01T00:00:00-04:00"
  */
 function parseTime(s){
   var _s = s.split(' ');
   var date = _s[0].split('/');
-  var time = _s[1] + '.000Z';
+  var time = _s[1] + '-05:00';
   var m = +date[0] > 10 ? date[0] : '0' + date[0]; 
   var d = +date[1] > 10 ? date[1] : '0' + date[1];
   var formatedDate = date[2] + '-' + m + '-' + d + 'T';

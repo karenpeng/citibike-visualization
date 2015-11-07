@@ -66103,17 +66103,17 @@ SkyColor.prototype.set = function(time, color){
     try{
       minutes = moment(time).getHours() * 60 + moment(time).getMinutes()
     }catch(e){
-      throw new Error('sky-color-generator: invalid time')
+      throw new Error('sky-color-generator: invalid time ' + time)
       return
     }
    
   }else{
-    throw new Error('sky-color-generator: invalid time')
+    throw new Error('sky-color-generator: invalid time ' + time)
     return
   }
 
   if(Array.isArray(color)){
-    c = color
+    c = [color[0], color[1], color[2], color[3] || 1]
   }else{
     throw new Error('sky-color-generator: sorry color only supports rgba array now :(')
     return
@@ -66150,12 +66150,12 @@ SkyColor.prototype.get = function(time){
     try{
       minutes = moment(time).getHours() * 60 + moment(time).getMinutes()
     }catch(e){
-      throw new Error('sky-color-generator: invalid time')
+      throw new Error('sky-color-generator: invalid time ' + time)
       return
     }
    
   }else{
-    throw new Error('sky-color-generator: invalid time')
+    throw new Error('sky-color-generator: invalid time ' + time)
     return
   }
 
@@ -67348,14 +67348,16 @@ var Info = require('./ui/info');
 var animationID;
 var index = 0;
 var rate = 20000;
-var fakeTime = moment("2015-09-01T00:00:00.000Z").subtract(rate, 'millisecond');
+var fakeTime = moment("2015-09-01T00:00:00-05:00").subtract(rate, 'millisecond');
 var size;
 var timeData;
 var stationData = {};
 //var total = 0;
 
-var stationURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/stations.json';
-var recordURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/records.json';
+//var stationURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/stations.json';
+//var recordURL = 'http://karenpeng.github.io/citibike-visualization/processed_data/records.json';
+var stationURL = './../processed_data/stations.json'
+var recordURL = './../processed_data/records.json'
 
 var scale = d3.scale.sqrt().range([0, 30]).domain([0, 60]);
 
@@ -67620,6 +67622,11 @@ var Clock = React.createClass({
     return r.div({
       className: 'time'
     },[
+
+      r.p({
+        className: 'date',
+        style: dateStyle
+      },'New York'),
 
       r.p({
         className: 'date',

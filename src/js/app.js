@@ -35,7 +35,7 @@ var Info = require('./ui/info');
 var animationID;
 var index = 0;
 var rate = 20000;
-var fakeTime = moment("2015-09-01T00:00:00.000Z").subtract(rate, 'millisecond');
+var fakeTime = moment("2015-09-01T00:00:00-05:00").subtract(rate, 'millisecond');
 var size;
 var timeData;
 var stationData = {};

@@ -31,6 +31,11 @@ var Clock = React.createClass({
       r.p({
         className: 'date',
         style: dateStyle
+      },'New York'),
+
+      r.p({
+        className: 'date',
+        style: dateStyle
       }, _m+'/'+_d+'/2015'),
 
       r.div({
