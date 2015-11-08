@@ -1058,7 +1058,7 @@ var ScatterplotOverlay = React.createClass({
     ctx.fill();
     ctx.restore();
 
-    var scalar = Math.pow(this.props.zoom / this.props.defaultZoom, 6);
+    var scalar = Math.pow(2, this.props.zoom) / Math.pow(2, this.props.defaultZoom);
 
     if ((this.props.renderWhileDragging || !this.props.isDragging) &&
       this.props.dots // this.props.locations
